@@ -1,16 +1,42 @@
 #include <Arduino.h>
 #include "HX711.h"
+#include "MyStone.h"
 
 // Définir les broches pour HX711
 #define DT 19  // Broche DATA
 #define SCK 05 // Broche CLOCK
 
+#define TX 17
+#define RX 16
+
 HX711 scale; // Instance du module HX711
+
+MyStone *myStone = nullptr;
+// Instanciation de la classe MyStone
+
+char* floatToChar(float theFloatValue)
+{
+    char *valeurSTR = new char[7];
+    sprintf(valeurSTR, "%.1f", theFloatValue);
+    return valeurSTR;
+};
+
+void lookingForDatas()
+{
+    datasRead dr = myStone->getValidsDatasIfExists();
+    Serial.println("Data:");
+    Serial.println(dr.data);
+};
+
 
 void setup()
 {
   Serial.begin(9600); // Initialiser la communication série
+
+  myStone = new MyStone(115200, SERIAL_8N1, RX,TX);
   Serial.println("Initialisation du HX711...");
+  delay(1000);
+  myStone->changePage("w_weight_measure");
 
   // Configurer les broches DATA et CLOCK
   scale.begin(DT, SCK);
@@ -57,18 +83,21 @@ void setup()
 // }
 void loop()
 {
+  lookingForDatas();
+  myStone->changePage("w_weight_measure");
   if (scale.is_ready())
   {
     long raw = scale.read();            // Lire la valeur brute de l'ADC
     float weight = scale.get_units(10); // Moyenne de 10 lectures
 
-    Serial.print("Poids : ");
-    Serial.print(weight);
-    Serial.println(" g");
+    // Serial.print("Poids : ");
+    // Serial.print(weight);
+    // Serial.println(" g");
+    // myStone->setTextLabel("lbl_weight",floatToChar(weight));
 
-    Serial.print("Valeur brute : ");
-    Serial.println(scale.get_units(1));
-    delay(500);
+    // Serial.print("Valeur brute : ");
+    // Serial.println(scale.get_units(1));
+    //delay(500);
   }
   else
   {

@@ -94,11 +94,10 @@ datasRead MyStone::getValidsDatasIfExists()
   returnedDatasRead.nameEdt[0] = 0x00;
   returnedDatasRead.valueEdt[0] = 0x00;
   returnedDatasRead.keyValue = 0;
-
+  
   // Recherche de données valide
   if (!mySerial->isAvailable())
     return (returnedDatasRead);
-
   // Décapsulation de l'en-tete
   if (!findHeader())
   {
@@ -431,7 +430,11 @@ void MyStone::changePage(const char *pageName)
           COMMAND_END);
 
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
+  {
+    Serial.println(cmdFormat2);
+    mySerial->writeIt("ST<{\"cmd_code\":\"open_win\",\"type\":\"window\",\"widget\":\"w_weight_measure\"}>ET");
+  }
+    
 };
 
 /**
