@@ -76,4 +76,5 @@ dependencies {
     implementation(libs.paho.mqtt)
     implementation(libs.paho.android.service)
 
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 }

@@ -1,44 +1,81 @@
 package com.quentinlecourt.podwertask_mobile
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.quentinlecourt.podwertask_mobile.data.mqtt.MqttService
+import androidx.lifecycle.lifecycleScope
+import org.eclipse.paho.client.mqttv3.*
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var textView: TextView
-    private val mqttServiceReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // Récupérer le message du broadcast
-            val message = intent?.getStringExtra("message") ?: "Aucun message reçu"
-            // Mettre à jour le TextView avec le dernier message
-            textView.text = message
-        }
-    }
+
+
+    private lateinit var mqttClient: MqttClient
+    private val brokerUrl = "ssl://mqtt.powdertask.quentinlecourt.com:8883"
+    private val clientId = "AndroidClient"
+    private val topic = "test"
+    private lateinit var tv_lastmessage: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        tv_lastmessage = findViewById(R.id.tv_lastmessage)
+        connectToMqttBroker()
+    }
 
-        // Initialiser le TextView
-        textView = findViewById(R.id.tv_lastmessage)
+    private fun connectToMqttBroker() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Options de connexion MQTT
+                val options = MqttConnectOptions().apply {
+                    isCleanSession = true // Démarrer une nouvelle session
+                    userName = "pwtk-mqtt" // Identifiant
+                    password = "esy6z0%FwS0f*X3vtb5X".toCharArray() // Mot de passe
+                }
 
-        // Démarrer le service MQTT
-        val intent = Intent(this, MqttService::class.java)
-        startService(intent)
+                // Créer le client MQTT
+                mqttClient = MqttClient(brokerUrl, clientId, MemoryPersistence())
 
-        // Enregistrer le BroadcastReceiver pour écouter les mises à jour
-        registerReceiver(mqttServiceReceiver, IntentFilter("MQTT_MESSAGE_UPDATE"))
+                // Définir le callback pour gérer les messages reçus
+                mqttClient.setCallback(object : MqttCallback {
+                    override fun connectionLost(cause: Throwable?) {
+                        // Gérer la perte de connexion
+                        runOnUiThread {
+                            tv_lastmessage.text = "Connexion perdue : ${cause?.message}"
+                        }
+                    }
+
+                    override fun messageArrived(topic: String?, message: MqttMessage?) {
+                        val payload = String(message?.payload ?: byteArrayOf())
+                        runOnUiThread { // Utilisez runOnUiThread pour mettre à jour l'UI
+                            tv_lastmessage.text = "Dernier message reçu: $payload"
+                        }
+                    }
+
+                    override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                        // Gérer la fin de la livraison
+                        println("Message livré")
+                    }
+                })
+
+                // Se connecter au broker MQTT
+                mqttClient.connect(options)
+
+                // S'abonner au topic
+                mqttClient.subscribe(topic, 1)
+                println("Connecté et abonné au topic : $topic")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                println("Erreur de connexion : ${e.message}")
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Désenregistrer le BroadcastReceiver pour éviter les fuites de mémoire
-        unregisterReceiver(mqttServiceReceiver)
+        mqttClient.disconnect()
     }
 }
