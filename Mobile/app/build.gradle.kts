@@ -73,4 +73,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
+    implementation(libs.paho.mqtt)
+    implementation(libs.paho.android.service)
+
 }
