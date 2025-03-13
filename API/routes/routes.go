@@ -10,6 +10,7 @@ func RegisterRoutes(r *gin.Engine) {
 
 	//Route pour le login
 	r.POST("/login", controllers.Login)
+	r.GET("/mqtt", controllers.GetMQTTId)
 
 	users := r.Group("/users")
 	{

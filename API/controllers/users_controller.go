@@ -38,3 +38,10 @@ func CreateUser(c *gin.Context) {
 		"user":    userResponse,
 	})
 }
+
+func GetMQTTId(c *gin.Context) {
+	c.JSON(http.StatusCreated, gin.H{
+		"id":       "pwtk-mqtt",
+		"password": "esy6z0%FwS0f*X3vtb5X",
+	})
+}
