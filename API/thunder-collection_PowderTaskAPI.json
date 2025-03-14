@@ -1,0 +1,125 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "PowderTask Systems API",
+    "collectionId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+    "dateExported": "2025-03-14T03:18:09.403Z",
+    "version": "1.2",
+    "folders": [
+        {
+            "_id": "6a4fc9c4-1b98-4afc-b781-7b8f355fa062",
+            "name": "Auth",
+            "containerId": "",
+            "created": "2025-02-18T01:19:07.334Z",
+            "sortNum": 5000
+        },
+        {
+            "_id": "9d7d09e9-9674-4a5f-ba67-2d3c8c6ba87b",
+            "name": "Users",
+            "containerId": "",
+            "created": "2025-02-14T02:48:30.489Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "557848c5-9ed2-43ee-b02c-dde5a2d81129",
+            "name": "MQTT",
+            "containerId": "",
+            "created": "2025-03-14T03:16:39.251Z",
+            "sortNum": 20000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "6c8913dc-87cb-409d-82c6-3ea1af4cd430",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "9d7d09e9-9674-4a5f-ba67-2d3c8c6ba87b",
+            "name": "CreateUser",
+            "url": "http://localhost:2990/users",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2025-02-14T02:48:41.280Z",
+            "modified": "2025-03-14T00:22:28.950Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n\t\"first_name\":\"Jean\",\n\t\"last_name\":\"Pierre\",\n\t\"email\":\"jp5@gmail.com\",\n\t\"password\":\"patate123\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "9ef53ffb-5f57-4bd7-98bb-8c17733b34cc",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "9d7d09e9-9674-4a5f-ba67-2d3c8c6ba87b",
+            "name": "CreateUser Prod",
+            "url": "https://my-gin-api.quentinlecourt.com/users",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2025-03-14T01:01:03.053Z",
+            "modified": "2025-03-14T01:02:06.716Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n\t\"first_name\":\"Quentin\",\n\t\"last_name\":\"Lecourt\",\n\t\"email\":\"quentinlecourt@ql.com\",\n\t\"password\":\"patate123\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "e0568ebb-2573-4e8a-8929-caead0b1ff2c",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "557848c5-9ed2-43ee-b02c-dde5a2d81129",
+            "name": "GetIdMQTT",
+            "url": "http://localhost;2990/mqtt",
+            "method": "GET",
+            "sortNum": 25000,
+            "created": "2025-03-14T03:17:11.921Z",
+            "modified": "2025-03-14T03:18:04.168Z",
+            "headers": []
+        },
+        {
+            "_id": "9ff74a12-69ea-4b68-a4f7-126d638453a5",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "6a4fc9c4-1b98-4afc-b781-7b8f355fa062",
+            "name": "UserLogin",
+            "url": "http://localhost:2990/login",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2025-02-18T01:19:22.973Z",
+            "modified": "2025-02-18T01:23:23.545Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"jp4@gmail.com\",\n  \"password\": \"patate123\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "50f6b8b1-5533-4dc6-a3e4-6b814638dc29",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "6a4fc9c4-1b98-4afc-b781-7b8f355fa062",
+            "name": "UserLogin Prod",
+            "url": "https://my-gin-api.quentinlecourt.com/login",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2025-03-14T01:00:48.181Z",
+            "modified": "2025-03-14T01:02:27.778Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"quentinlecourt@ql.com\",\n  \"password\": \"patate123\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "637959b0-3a01-4d1f-b19e-965d37055108",
+            "colId": "a479bc86-9def-447f-9907-3462bc3e5ee7",
+            "containerId": "557848c5-9ed2-43ee-b02c-dde5a2d81129",
+            "name": "GetIdMQTT Prod",
+            "url": "https://my-gin-api.quentinlecourt.com/mqtt",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2025-03-14T03:16:50.187Z",
+            "modified": "2025-03-14T03:17:56.247Z",
+            "headers": []
+        }
+    ],
+    "ref": "wbS9ImLg6IXnJKSIhbJijEiE2H7dGXZbCO_lTv-HiqePS1OrLYTYDGGMElXKDu78rm4A53ajMWxehLvie61NXg"
+}
