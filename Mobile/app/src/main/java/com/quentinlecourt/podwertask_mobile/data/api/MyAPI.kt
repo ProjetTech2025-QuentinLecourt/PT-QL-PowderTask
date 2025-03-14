@@ -2,9 +2,11 @@ package com.quentinlecourt.podwertask_mobile.data.api
 
 import com.quentinlecourt.podwertask_mobile.data.model.LoginRequest
 import com.quentinlecourt.podwertask_mobile.data.model.LoginResponse
+import com.quentinlecourt.podwertask_mobile.data.model.MqttIdResponse
 import retrofit2.http.POST
 import retrofit2.http.Body
 import retrofit2.Response
+import retrofit2.http.GET
 
 /**
  * MyApi
@@ -13,4 +15,7 @@ import retrofit2.Response
 interface MyAPI {
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    @GET("mqtt")
+    suspend fun getMqttId(): Response<MqttIdResponse>
+
 }
