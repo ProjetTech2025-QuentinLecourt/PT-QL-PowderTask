@@ -18,7 +18,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // URL vers l'API
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:2990/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://my-gin-api.quentinlecourt.com/\"")
     }
 
     buildTypes {
