@@ -102,7 +102,6 @@ void setup()
   myStone = new MyStone(115200, SERIAL_8N1, RX,TX);
   Serial.println("Initialisation du HX711...");
   delay(1000);
-  myStone->changePage("w_weight_measure");
 
   // Configurer les broches DATA et CLOCK
   scale.begin(DT, SCK);
@@ -125,6 +124,8 @@ void setup()
   scale.tare();            // Ajustez la tare       // Réinitialiser le poids à zéro
 
   Serial.println("HX711 prêt !");
+  myStone->changePage("overlay_layout");
+  myStone->changePage("w_weight_measure");
 }
 
 
