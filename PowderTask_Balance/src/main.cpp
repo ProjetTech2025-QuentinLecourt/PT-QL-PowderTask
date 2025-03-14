@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-#include "HX711.h"
+#include "Scale.h"
 #include "MyStone.h"
 
 // Définir les broches pour HX711
@@ -12,7 +12,11 @@
 #define TX 17
 #define RX 16
 
-HX711 scale; // Instance du module HX711
+#define STONE_SPEED 115200
+
+#define ESP_SPEED 9600
+
+Scale* scale = nullptr; // Instance du module HX711
 
 MyStone *myStone = nullptr;
 // Instanciation de la classe MyStone
@@ -20,7 +24,7 @@ MyStone *myStone = nullptr;
 char* floatToChar(float theFloatValue)
 {
     char *valeurSTR = new char[7];
-    sprintf(valeurSTR, "%.1f", theFloatValue);
+    sprintf(valeurSTR, "%.2f", theFloatValue);
     return valeurSTR;
 };
 
@@ -82,7 +86,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
 
 void setup()
 {
-  Serial.begin(9600); // Initialiser la communication série
+  Serial.begin(ESP_SPEED); // Initialiser la communication série
 
   // Se connecter au Wi-Fi
   connectToWiFi();
@@ -100,31 +104,40 @@ void setup()
   connectToMqtt();
 
   myStone = new MyStone(115200, SERIAL_8N1, RX,TX);
-  Serial.println("Initialisation du HX711...");
-  delay(1000);
+  delay(100);
 
-  // Configurer les broches DATA et CLOCK
-  scale.begin(DT, SCK);
-  scale.set_gain(); // Configurer le gain du module
-
-  // Attendre que le module soit prêt
-  // Faire une méthode dans la classe MyCells pour attendre que le module soit prêt ou que X temps soit passé.
-  scale.wait_ready(200);
-  // Vérification si le module est prêt
-  if (!scale.is_ready())
+  scale = new Scale(DT, SCK); // Initialiser le module HX711
+  if (scale == nullptr || !scale->init(400, 100))
   {
-    Serial.println("Erreur : HX711 non connecté !");
+    myStone->changePage("pup_alerte");
+    myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'initialisation");
+    myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'intialiser la balance !");
+    myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
     while (1)
       ;
   }
-
-  // Configurer le facteur d'échelle (calibration)
-  scale.set_scale(21.7074f); // Facteur à ajuster en fonction de votre capteur
-  delay(3000);             // Laissez le HX711 se stabiliser
-  scale.tare();            // Ajustez la tare       // Réinitialiser le poids à zéro
-
+  else {
+    myStone->changePage("pup_alerte");
+    myStone->setTextLabel("lbl_title_alert_pup", "OK");
+    myStone->setTextLabel("lbl_description_alert_pup", "A !");
+    myStone->setTextLabel("lbl_description2_alert_pup", "B !");
+    delay(5000);
+  }
+  // Vérification si le module est prêt
+  if (!scale->is_ready())
+  {
+    myStone->changePage("pup_alerte");
+    myStone->setTextLabel("lbl_title_alert_pup", "Erreur de communication");
+    myStone->setTextLabel("lbl_description_alert_pup", "Les capteurs de poinds n'arrivent pas à être prêts !");
+    myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
+    while (1)
+      ;
+  }
+  scale->tare();          // Ajustez la tare       // Réinitialiser le poids à zéro
+  delay(1000);
   Serial.println("HX711 prêt !");
   myStone->changePage("overlay_layout");
+  delay(1000);
   myStone->changePage("w_weight_measure");
 }
 
@@ -156,10 +169,9 @@ void loop()
   }
   mqttClient.loop();
   
-  if (scale.is_ready())
-  {
-    long raw = scale.read();            // Lire la valeur brute de l'ADC
-    float weight = scale.get_units(10); // Moyenne de 10 lectures
+  if (scale->is_ready())
+  {            // Lire la valeur brute de l'ADC
+    float weight = scale->get_units_kg(30); // Moyenne de 10 lectures
 
     Serial.print("Poids : ");
     Serial.print(weight);
@@ -168,7 +180,7 @@ void loop()
     mqttClient.publish("test",floatToChar(weight));
 
     Serial.print("Valeur brute : ");
-    Serial.println(scale.get_units(1));
+    Serial.println(scale->get_units_g(1));
     delay(500);
   }
   else
@@ -176,5 +188,5 @@ void loop()
     Serial.println("Erreur : Impossible de lire les données du HX711 !");
   }
 
-  delay(1000);
+  delay(10);
 }

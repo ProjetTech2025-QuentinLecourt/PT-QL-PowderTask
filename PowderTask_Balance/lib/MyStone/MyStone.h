@@ -2,7 +2,7 @@
  * Classe MyStone
  * Des méthodes supplémentaires sont ajoutées
  * @file MyStone.h
- * @author Lecourt Quentin et Lyes Hamrani
+ * @author Lecourt Quentin
  * @cite Depuis la base de MyStone de Alain Dubé
  * @brief Declaration de la classe MyStone
  * @version 1.4
