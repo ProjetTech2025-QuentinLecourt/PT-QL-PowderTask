@@ -33,6 +33,8 @@ private:
     static const char *COMMAND_BEGIN;
     static const char *COMMAND_END;
     // Les commandes
+    static const char* COMMAND_SET_VISIBLE;
+    static const char* COMMAND_SET_ENABLE;
     static const char *COMMAND_SET_TEXT;
     static const char *COMMAND_SET_VALUE;
     static const char *COMMAND_GET_TEXT;
@@ -49,6 +51,8 @@ private:
     static const char *COMMAND_WINDGET;
     static const char *COMMAND_VALUE;
     static const char *COMMAND_QUOTE;
+    static const char* COMMAND_ENABLE;
+    static const char* COMMAND_VISIBLE;
 
 public:
     MyStone(int speed, uint32_t config, int rxd, int txd);
@@ -64,5 +68,8 @@ public:
     void setRadioButtonTrue(const char *radioButtonName);
 
     void laodView(const char *pageName);
+
+    void setEnable(const char *widgetName, bool enable);
+    void setVisible(const char *widgetName, bool enable);
 };
 #endif

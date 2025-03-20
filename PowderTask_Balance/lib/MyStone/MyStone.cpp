@@ -24,6 +24,10 @@ const char *MyStone::COMMAND_BEGIN = "ST<{\"cmd_code\":";
 // Frame fin d'une commande
 const char *MyStone::COMMAND_END = "}>ET";
 
+// Frame set_visible
+const char *MyStone::COMMAND_SET_VISIBLE = "\"set_visible\"";
+// Frame set_enable
+const char *MyStone::COMMAND_SET_ENABLE = "\"set_enable\"";
 // Frame get_value
 const char *MyStone::COMMAND_GET_TEXT = "\"get_text\"";
 // Frame set_value
@@ -54,6 +58,10 @@ const char *MyStone::COMMAND_QUOTE = "\"";
 const char *MyStone::COMMAND_VALUE = ",\"value\":";
 // Frame windget pour commande
 const char *MyStone::COMMAND_WINDGET = ",\"widget\":";
+// Frame enable
+const char *MyStone::COMMAND_ENABLE = ",\"enable\":";
+// Frame visible
+const char *MyStone::COMMAND_VISIBLE = ",\"visible\":";
 
 /**
  *
@@ -94,7 +102,7 @@ datasRead MyStone::getValidsDatasIfExists()
   returnedDatasRead.nameEdt[0] = 0x00;
   returnedDatasRead.valueEdt[0] = 0x00;
   returnedDatasRead.keyValue = 0;
-  
+
   // Recherche de données valide
   if (!mySerial->isAvailable())
     return (returnedDatasRead);
@@ -269,10 +277,10 @@ bool MyStone::readTail()
 
 /**
  * Methode getEditTextValue
- * 
+ *
  * Récupère la valeur d'un champ de texte éditable.
  * Cette fonction envoie une commande pour obtenir le contenu d'un champ de texte spécifique.
- * 
+ *
  * @param editName Le nom de l'élément éditable dont la valeur est à récupérer.
  */
 void MyStone::getEditTextValue(const char *editName)
@@ -298,10 +306,10 @@ void MyStone::getEditTextValue(const char *editName)
 
 /**
  * Methode setTextValue
- * 
+ *
  * Définit le texte d'une étiquette (label).
  * Cette fonction envoie une commande pour modifier le texte affiché par une étiquette.
- * 
+ *
  * @param labelName Le nom de l'étiquette.
  * @param text Le texte à afficher dans l'étiquette.
  */
@@ -334,10 +342,10 @@ void MyStone::setTextLabel(const char *labelName, const char *text)
 
 /**
  * Methode setTextButton
- * 
+ *
  * Définit le texte d'un bouton.
  * Cette fonction envoie une commande pour modifier le texte affiché sur un bouton.
- * 
+ *
  * @param buttonName Le nom du bouton.
  * @param text Le texte à afficher sur le bouton.
  */
@@ -370,10 +378,10 @@ void MyStone::setTextButton(const char *buttonName, const char *text)
 
 /**
  * Methode setTipsEdit
- * 
+ *
  * Définit l'astuce d'un champ éditable.
  * Cette fonction envoie une commande pour attribuer une astuce à un champ éditable.
- * 
+ *
  * @param editName Le nom de l'élément éditable.
  * @param tips Le texte de l'astuce à afficher.
  */
@@ -406,11 +414,11 @@ void MyStone::setTipsEdit(const char *editName, const char *tips)
 
 /**
  * Methode loadView
- * 
+ *
  * Charge les fenêtres, les popup, les overlay...
- * Cette fonction envoie une commande pour changer la page affichée. 
+ * Cette fonction envoie une commande pour changer la page affichée.
  * Si aucun nom de page n'est spécifié, elle revient à la page d'accueil.
- * 
+ *
  * @param pageName Le nom de la page à afficher. Par défaut : "home_page".
  */
 void MyStone::laodView(const char *pageName)
@@ -431,18 +439,16 @@ void MyStone::laodView(const char *pageName)
 
   if (mySerial)
   {
-    Serial.println(cmdFormat2);
     mySerial->writeIt(cmdFormat2);
   }
-    
 };
 
 /**
  * setRadioButtonTrue
- * 
+ *
  * Active un bouton radio.
  * Cette fonction envoie une commande pour définir un bouton radio comme étant sélectionné.
- * 
+ *
  * @param radioButtonName Le nom du bouton radio à activer.
  */
 void MyStone::setRadioButtonTrue(const char *radioButtonName)
@@ -469,3 +475,59 @@ void MyStone::setRadioButtonTrue(const char *radioButtonName)
   if (mySerial)
     mySerial->writeIt(cmdFormat2);
 };
+
+void MyStone::setEnable(const char *widget, bool enable)
+{
+  char cmdFormat2[1024];
+  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s",
+          COMMAND_BEGIN,
+
+          COMMAND_SET_ENABLE,
+
+          COMMAND_TYPE,
+          "\"widget\"",
+
+          COMMAND_WINDGET,
+          COMMAND_QUOTE,
+          widget,
+          COMMAND_QUOTE,
+
+          COMMAND_ENABLE,
+          enable ? "true" : "false",
+
+          COMMAND_END);
+
+  if (mySerial)
+  {
+    Serial.println(cmdFormat2);
+    mySerial->writeIt(cmdFormat2);
+  }
+}
+
+void MyStone::setVisible(const char *widget, bool enable)
+{
+  char cmdFormat2[1024];
+  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s",
+          COMMAND_BEGIN,
+
+          COMMAND_SET_VISIBLE,
+
+          COMMAND_TYPE,
+          "\"widget\"",
+
+          COMMAND_WINDGET,
+          COMMAND_QUOTE,
+          widget,
+          COMMAND_QUOTE,
+
+          COMMAND_VISIBLE,
+          enable ? "true" : "false",
+
+          COMMAND_END);
+
+  if (mySerial)
+  {
+    Serial.println(cmdFormat2);
+    mySerial->writeIt(cmdFormat2);
+  }
+}

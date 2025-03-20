@@ -89,8 +89,6 @@ bool PowderScaleController::init()
 
 void PowderScaleController::connectToWiFi()
 {
-    Serial.println(ssid);
-    Serial.println(password);
     Serial.println("Connecting to Wi-Fi...");
     
     WiFi.begin(ssid, password);
