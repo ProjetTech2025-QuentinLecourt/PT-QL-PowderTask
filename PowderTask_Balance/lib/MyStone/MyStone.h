@@ -63,6 +63,6 @@ public:
     void setTipsEdit(const char *editName, const char *tips);
     void setRadioButtonTrue(const char *radioButtonName);
 
-    void changePage(const char *pageName);
+    void laodView(const char *pageName);
 };
 #endif

@@ -44,7 +44,7 @@ bool PowderScaleController::init()
     // Verification de la communication avec le HX711
     if (scaleClass == nullptr)
     {
-        myStone->changePage("pup_alerte");
+        myStone->laodView("pup_alerte");
         myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'instanciation");
         myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'instancier la classe de la balance !");
         // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
@@ -52,7 +52,7 @@ bool PowderScaleController::init()
     }
     if (!scaleClass->init(400, 100))
     {
-        myStone->changePage("pup_alerte");
+        myStone->laodView("pup_alerte");
         myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'initialisation");
         myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'intialiser la balance !");
         // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
@@ -81,9 +81,9 @@ bool PowderScaleController::init()
     scaleClass->set_scale(scale);
     scaleClass->tare(); // Réinitialiser le poids à zéro
     delay(1000);
-    myStone->changePage("w_dashbord");
+    myStone->laodView("w_dashbord");
     delay(1000);
-    myStone->changePage("overlay_layout");
+    myStone->laodView("overlay_layout");
     return true;
 }
 

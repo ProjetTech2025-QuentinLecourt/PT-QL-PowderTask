@@ -405,15 +405,15 @@ void MyStone::setTipsEdit(const char *editName, const char *tips)
 };
 
 /**
- * Methode changePage
+ * Methode loadView
  * 
- * Change la page actuelle.
+ * Charge les fenêtres, les popup, les overlay...
  * Cette fonction envoie une commande pour changer la page affichée. 
  * Si aucun nom de page n'est spécifié, elle revient à la page d'accueil.
  * 
  * @param pageName Le nom de la page à afficher. Par défaut : "home_page".
  */
-void MyStone::changePage(const char *pageName)
+void MyStone::laodView(const char *pageName)
 {
   pageName = strlen(pageName) ? pageName : "home_page";
   char cmdFormat2[1024];
