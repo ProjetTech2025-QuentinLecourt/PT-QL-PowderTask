@@ -13,4 +13,25 @@ struct datasRead
     int keyValue;
     char line[2048];
 };
+
+struct controllerInit {
+    // Scale GPIO
+    int dt;
+    int sck;
+    // Scale params
+    float scale;
+    byte tare;
+    // Stone
+    int stoneSpeed;
+    int rx;
+    int tx;
+    // Wifi
+    char* ssid;
+    char* password;
+    // MQTT
+    const char* mqtt_server;
+    int mqtt_port;
+    const char* mqtt_user;
+    const char* mqtt_password;
+};
 #endif

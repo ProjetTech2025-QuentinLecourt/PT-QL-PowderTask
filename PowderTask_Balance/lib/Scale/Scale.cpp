@@ -22,7 +22,7 @@ Scale::Scale(int dt = 33, int sck = 25) {
 
 // Destructor
 Scale::~Scale() {
-    
+    delete scale;
 }
 
 // Method to initialize the scale
