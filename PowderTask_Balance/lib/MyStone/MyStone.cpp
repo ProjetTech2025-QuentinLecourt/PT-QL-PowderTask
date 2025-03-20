@@ -432,7 +432,7 @@ void MyStone::changePage(const char *pageName)
   if (mySerial)
   {
     Serial.println(cmdFormat2);
-    mySerial->writeIt("ST<{\"cmd_code\":\"open_win\",\"type\":\"window\",\"widget\":\"w_weight_measure\"}>ET");
+    mySerial->writeIt(cmdFormat2);
   }
     
 };

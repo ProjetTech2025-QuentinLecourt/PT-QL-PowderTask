@@ -19,6 +19,8 @@
 Scale* scale = nullptr; // Instance du module HX711
 
 MyStone *myStone = nullptr;
+
+bool displayLayout = false;
 // Instanciation de la classe MyStone
 
 char* floatToChar(float theFloatValue)
@@ -28,6 +30,14 @@ char* floatToChar(float theFloatValue)
     return valeurSTR;
 };
 
+void openLayout()
+{
+    if (!displayLayout)
+    {
+        myStone->changePage("overlay_layout");
+    }
+    displayLayout = !displayLayout;
+};
 void lookingForDatas()
 {
     datasRead dr = myStone->getValidsDatasIfExists();
@@ -117,28 +127,14 @@ void setup()
       ;
   }
   else {
-    myStone->changePage("pup_alerte");
-    myStone->setTextLabel("lbl_title_alert_pup", "OK");
-    myStone->setTextLabel("lbl_description_alert_pup", "A !");
-    myStone->setTextLabel("lbl_description2_alert_pup", "B !");
-    delay(5000);
-  }
-  // Vérification si le module est prêt
-  if (!scale->is_ready())
-  {
-    myStone->changePage("pup_alerte");
-    myStone->setTextLabel("lbl_title_alert_pup", "Erreur de communication");
-    myStone->setTextLabel("lbl_description_alert_pup", "Les capteurs de poinds n'arrivent pas à être prêts !");
-    myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
-    while (1)
-      ;
   }
   scale->tare();          // Ajustez la tare       // Réinitialiser le poids à zéro
   delay(1000);
   Serial.println("HX711 prêt !");
-  myStone->changePage("overlay_layout");
   delay(1000);
   myStone->changePage("w_weight_measure");
+  delay(1000);
+  openLayout();
 }
 
 
@@ -171,22 +167,21 @@ void loop()
   
   if (scale->is_ready())
   {            // Lire la valeur brute de l'ADC
-    float weight = scale->get_units_kg(30); // Moyenne de 10 lectures
+    float weight = scale->get_units_kg(30);
 
     Serial.print("Poids : ");
     Serial.print(weight);
-    Serial.println(" g");
+    Serial.println(" Kg");
     myStone->setTextLabel("lbl_weight",floatToChar(weight));
     mqttClient.publish("test",floatToChar(weight));
-
     Serial.print("Valeur brute : ");
     Serial.println(scale->get_units_g(1));
-    delay(500);
+    delay(1000);
   }
   else
   {
     Serial.println("Erreur : Impossible de lire les données du HX711 !");
   }
 
-  delay(10);
+  delay(100);
 }
