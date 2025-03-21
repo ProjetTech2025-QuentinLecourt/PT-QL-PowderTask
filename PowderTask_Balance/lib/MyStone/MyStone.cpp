@@ -85,7 +85,10 @@ MyStone::MyStone(int speed, uint32_t config, int rxd, int txd)
 /**
  * Destructeur de la classe MyStone
  */
-MyStone::~MyStone() {};
+MyStone::~MyStone()
+{
+  delete mySerial;
+};
 
 /**
  * getValidsDatasIdExists()
@@ -163,8 +166,8 @@ datasRead MyStone::getValidsDatasIfExists()
       valeur[j] = data[i];
     }
     valeur[j] = '\0';
-    Serial.println(nom);
-    Serial.println(valeur);
+    // Serial.println(nom);
+    // Serial.println(valeur);
 
     strcpy(returnedDatasRead.nameEdt, nom);
     strcpy(returnedDatasRead.valueEdt, valeur);
@@ -298,7 +301,8 @@ bool MyStone::readTail()
  */
 String MyStone::generateCmd(const char *cmdCode, const char *type, const char *widget, const char *key, const char *value)
 {
-  Serial.println("Nouvelle commende :");
+  // Debug
+  // Serial.println("Nouvelle commende :");
   char cmdFormat[1024];
   char valuePart[256] = "";
 
@@ -308,13 +312,11 @@ String MyStone::generateCmd(const char *cmdCode, const char *type, const char *w
     if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0)
     {
       // Ajout de la valeur sans guillemets
-      Serial.println("ici");
       sprintf(valuePart, "%s", value);
     }
     else
     {
       // Ajout de la valeur avec guillemets
-      Serial.println("là");
       sprintf(valuePart, "%s%s%s", CMD_QUOTE, value, CMD_QUOTE);
     }
   }
@@ -333,8 +335,9 @@ String MyStone::generateCmd(const char *cmdCode, const char *type, const char *w
           valuePart,
           CMD_END);
 
-  Serial.println(cmdFormat);
-  Serial.println("");
+  // Debug
+  // Serial.println(cmdFormat);
+  // Serial.println("");
   return String(cmdFormat);
 }
 
@@ -433,7 +436,6 @@ void MyStone::loadView(const char *pageName)
           pageName,
           CMD_QUOTE,
           CMD_END);
-  Serial.println(cmdFormat2);
   if (mySerial)
     mySerial->writeIt(cmdFormat2);
 }
