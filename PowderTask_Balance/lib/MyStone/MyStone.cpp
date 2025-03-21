@@ -3,66 +3,72 @@
  *
  * @file MyStone.cpp
  * @author Lecourt Quentin
- * @cite Inspiré de MyStone par Alain Dubé
  * @brief Methode de la classe MyStone
- * @version 1.4
+ * @version 2.0
  * @date Création : 01/10/2024
- * @date Dernière mise à jour : Création : 10/10/2024
+ * @date Dernière mise à jour : 21/03/2025
  */
 #include "MyStone.h"
 
 /**
  * Constante static pour la instruction de retour Serie du Stone
  */
+/*----------------- CAPSULE -----------------*/
 // Frame header
-const char *MyStone::COMMAND_HEADER = "ST<";
+const char *MyStone::CMD_HEADER = "ST<";
 // Frame tail
-const char *MyStone::COMMAND_TAIL = ">ET";
+const char *MyStone::CMD_TAIL = ">ET";
 
 // Frame debut d'une commande
-const char *MyStone::COMMAND_BEGIN = "ST<{\"cmd_code\":";
+const char *MyStone::CMD_BEGIN = "ST<{\"cmd_code\":";
 // Frame fin d'une commande
-const char *MyStone::COMMAND_END = "}>ET";
+const char *MyStone::CMD_END = "}>ET";
 
+/*----------------- COMMAND CODE -----------------*/
 // Frame set_visible
-const char *MyStone::COMMAND_SET_VISIBLE = "\"set_visible\"";
+const char *MyStone::CMD_SET_VISIBLE = "\"set_visible\"";
 // Frame set_enable
-const char *MyStone::COMMAND_SET_ENABLE = "\"set_enable\"";
+const char *MyStone::CMD_SET_ENABLE = "\"set_enable\"";
 // Frame get_value
-const char *MyStone::COMMAND_GET_TEXT = "\"get_text\"";
+const char *MyStone::CMD_GET_TEXT = "\"get_text\"";
 // Frame set_value
-const char *MyStone::COMMAND_SET_VALUE = "\"set_value\"";
-// Frame set_text pour commande
-const char *MyStone::COMMAND_SET_TEXT = "\"set_text\"";
-// Frame open_win pour commande
-const char *MyStone::COMMAND_OPEN_WIN = "\"open_win\"";
-// Frame back_win pour commande
-const char *MyStone::COMMAND_BACK_WIN = "\"back_win\"";
+const char *MyStone::CMD_SET_VALUE = "\"set_value\"";
+// Frame set_text
+const char *MyStone::CMD_SET_TEXT = "\"set_text\"";
+// Frame open_win
+const char *MyStone::CMD_OPEN_WIN = "\"open_win\"";
+// Frame back_win
+const char *MyStone::CMD_BACK_WIN = "\"back_win\"";
 
-// Frame type pour commande
-const char *MyStone::COMMAND_TYPE = ",\"type\":";
-// Frame edit pour commande
-const char *MyStone::COMMAND_EDIT = "\"edit\"";
+/*----------------- WIDGET TYPE -----------------*/
+// Frame type
+const char *MyStone::CMD_TYPE = ",\"type\":";
+// Frame edit
+const char *MyStone::CMD_EDIT = "\"edit\"";
 // Frame button
-const char *MyStone::COMMAND_BUTTON = "\"button\"";
-// Frame label pour commande
-const char *MyStone::COMMAND_LABEL = "\"label\"";
-// Frame text pour commande
-const char *MyStone::COMMAND_TEXT = ",\"text\":";
+const char *MyStone::CMD_BUTTON = "\"button\"";
+// Frame label
+const char *MyStone::CMD_LABEL = "\"label\"";
+// Frame text
+const char *MyStone::CMD_TEXT = ",\"text\":";
 // Frame radio_button
-const char *MyStone::COMMAND_RADIO_BUTTON = "\"radio_button\"";
+const char *MyStone::CMD_RADIO_BUTTON = "\"radio_button\"";
+// Frame widget
+const char *MyStone::CMD_WIDGET_TYPE = "\"widget\"";
 
-// Frame " pour commande
-const char *MyStone::COMMAND_QUOTE = "\"";
+/*----------------- KEYS & VALUES-----------------*/
 // Frame value
-const char *MyStone::COMMAND_VALUE = ",\"value\":";
-// Frame windget pour commande
-const char *MyStone::COMMAND_WINDGET = ",\"widget\":";
+const char *MyStone::CMD_VALUE = ",\"value\":";
+// Frame windget
+const char *MyStone::CMD_WIDGET_KEY = ",\"widget\":";
 // Frame enable
-const char *MyStone::COMMAND_ENABLE = ",\"enable\":";
+const char *MyStone::CMD_ENABLE = ",\"enable\":";
 // Frame visible
-const char *MyStone::COMMAND_VISIBLE = ",\"visible\":";
+const char *MyStone::CMD_VISIBLE = ",\"visible\":";
 
+/*----------------- OTHERS -----------------*/
+// Frame guillements
+const char *MyStone::CMD_QUOTE = "\"";
 /**
  *
  * Constructeur de MyStone
@@ -188,7 +194,7 @@ bool MyStone::findHeader()
   int index = 0; // Index, nombre de caractères trouvés à la suite
   int byteRead;  // 0 ou moins si octet introuvable
 
-  int longeurHeader = strlen(COMMAND_HEADER);
+  int longeurHeader = strlen(CMD_HEADER);
 
   while (index < longeurHeader) // On doit trouver 3 caractères (ST<), c'est notre header
   {
@@ -199,7 +205,7 @@ bool MyStone::findHeader()
       return false; // Pas d'octet, donc rien à chercher
     }
     // Vérifier si le caractère correspond au header
-    index = (data[0] == COMMAND_HEADER[index]) ? index + 1 : 0;
+    index = (data[0] == CMD_HEADER[index]) ? index + 1 : 0;
   }
   // Si on sort de la boucle, cela signifie que tous les caractères ont été trouvés
   return true;
@@ -264,9 +270,9 @@ bool MyStone::readTail()
   int bytes = mySerial->readIt(TailDatas, 5);
   // On trouve et on verifie le TAIL
   if ((bytes != (strlen(TailDatas))) ||
-      (TailDatas[0] != COMMAND_TAIL[0]) ||
-      (TailDatas[1] != COMMAND_TAIL[1]) ||
-      (TailDatas[2] != COMMAND_TAIL[2]))
+      (TailDatas[0] != CMD_TAIL[0]) ||
+      (TailDatas[1] != CMD_TAIL[1]) ||
+      (TailDatas[2] != CMD_TAIL[2]))
   {
     return (false);
   }
@@ -276,33 +282,79 @@ bool MyStone::readTail()
 };
 
 /**
+ * Methode generateCmd
+ *
+ * Génère une commande adaptative à envoyer à l'écran Stone.
+ *
+ * @date Création : 21/03/2025
+ *
+ * @param cmdCode Le code de la commande à envoyer.
+ * @param type Le type de l'élément à modifier.
+ * @param widget Le nom de l'élément à modifier.
+ * @param key La clé de l'élément à modifier.
+ * @param value La valeur à attribuer à l'élément.
+ *
+ * @return La commande générée.
+ */
+String MyStone::generateCmd(const char *cmdCode, const char *type, const char *widget, const char *key, const char *value)
+{
+  Serial.println("Nouvelle commende :");
+  char cmdFormat[1024];
+  char valuePart[256] = "";
+
+  // Gérer la valeur en fonction de son type
+  if (value != NULL)
+  {
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0)
+    {
+      // Ajout de la valeur sans guillemets
+      Serial.println("ici");
+      sprintf(valuePart, "%s", value);
+    }
+    else
+    {
+      // Ajout de la valeur avec guillemets
+      Serial.println("là");
+      sprintf(valuePart, "%s%s%s", CMD_QUOTE, value, CMD_QUOTE);
+    }
+  }
+
+  // Structure et construction de la commande
+  sprintf(cmdFormat, "%s%s%s%s%s%s%s%s%s%s%s",
+          CMD_BEGIN,
+          cmdCode,
+          CMD_TYPE,
+          type,
+          CMD_WIDGET_KEY,
+          CMD_QUOTE,
+          widget,
+          CMD_QUOTE,
+          key,
+          valuePart,
+          CMD_END);
+
+  Serial.println(cmdFormat);
+  Serial.println("");
+  return String(cmdFormat);
+}
+
+/**
  * Methode getEditTextValue
  *
  * Récupère la valeur d'un champ de texte éditable.
- * Cette fonction envoie une commande pour obtenir le contenu d'un champ de texte spécifique.
+ * Cette fonction envoie une cmde pour obtenir le contenu d'un champ de texte spécifique.
+ *
+ * @date Dernière mise à jour : 21/03/2025
  *
  * @param editName Le nom de l'élément éditable dont la valeur est à récupérer.
  */
 void MyStone::getEditTextValue(const char *editName)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_GET_TEXT,
-
-          COMMAND_TYPE,
-          COMMAND_EDIT,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          editName,
-          COMMAND_QUOTE,
-          COMMAND_END);
-
+  // Générer la commande en utilisant generateCmd
+  String command = generateCmd(CMD_GET_TEXT, CMD_EDIT, editName, "", NULL);
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
-};
+    mySerial->writeIt(command.c_str());
+}
 
 /**
  * Methode setTextValue
@@ -310,35 +362,17 @@ void MyStone::getEditTextValue(const char *editName)
  * Définit le texte d'une étiquette (label).
  * Cette fonction envoie une commande pour modifier le texte affiché par une étiquette.
  *
+ * @date Dernière mise à jour : 21/03/2025
+ *
  * @param labelName Le nom de l'étiquette.
  * @param text Le texte à afficher dans l'étiquette.
  */
 void MyStone::setTextLabel(const char *labelName, const char *text)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_TEXT,
-
-          COMMAND_TYPE,
-          COMMAND_LABEL,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          labelName,
-          COMMAND_QUOTE,
-
-          COMMAND_TEXT,
-          COMMAND_QUOTE,
-          text,
-          COMMAND_QUOTE,
-
-          COMMAND_END);
-
+  String command = generateCmd(CMD_SET_TEXT, CMD_LABEL, labelName, CMD_TEXT, text);
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
-};
+    mySerial->writeIt(command.c_str());
+}
 
 /**
  * Methode setTextButton
@@ -346,35 +380,17 @@ void MyStone::setTextLabel(const char *labelName, const char *text)
  * Définit le texte d'un bouton.
  * Cette fonction envoie une commande pour modifier le texte affiché sur un bouton.
  *
+ * @date Dernière mise à jour : 21/03/2025
+ *
  * @param buttonName Le nom du bouton.
  * @param text Le texte à afficher sur le bouton.
  */
 void MyStone::setTextButton(const char *buttonName, const char *text)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_TEXT,
-
-          COMMAND_TYPE,
-          COMMAND_BUTTON,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          buttonName,
-          COMMAND_QUOTE,
-
-          COMMAND_TEXT,
-          COMMAND_QUOTE,
-          text,
-          COMMAND_QUOTE,
-
-          COMMAND_END);
-
+  String command = generateCmd(CMD_SET_TEXT, CMD_BUTTON, buttonName, CMD_TEXT, text);
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
-};
+    mySerial->writeIt(command.c_str());
+}
 
 /**
  * Methode setTipsEdit
@@ -382,35 +398,17 @@ void MyStone::setTextButton(const char *buttonName, const char *text)
  * Définit l'astuce d'un champ éditable.
  * Cette fonction envoie une commande pour attribuer une astuce à un champ éditable.
  *
+ * @date Dernière mise à jour : 21/03/2025
+ *
  * @param editName Le nom de l'élément éditable.
  * @param tips Le texte de l'astuce à afficher.
  */
 void MyStone::setTipsEdit(const char *editName, const char *tips)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_TEXT,
-
-          COMMAND_TYPE,
-          COMMAND_EDIT,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          editName,
-          COMMAND_QUOTE,
-
-          COMMAND_TEXT,
-          COMMAND_QUOTE,
-          tips,
-          COMMAND_QUOTE,
-
-          COMMAND_END);
-
+  String command = generateCmd(CMD_SET_TEXT, CMD_EDIT, editName, CMD_TEXT, tips);
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
-};
+    mySerial->writeIt(command.c_str());
+}
 
 /**
  * Methode loadView
@@ -419,29 +417,26 @@ void MyStone::setTipsEdit(const char *editName, const char *tips)
  * Cette fonction envoie une commande pour changer la page affichée.
  * Si aucun nom de page n'est spécifié, elle revient à la page d'accueil.
  *
+ * @date Dernière mise à jour : 21/03/2025
+ *
  * @param pageName Le nom de la page à afficher. Par défaut : "home_page".
  */
-void MyStone::laodView(const char *pageName)
+void MyStone::loadView(const char *pageName)
 {
   pageName = strlen(pageName) ? pageName : "home_page";
   char cmdFormat2[1024];
   sprintf(cmdFormat2, "%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_OPEN_WIN,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
+          CMD_BEGIN,
+          CMD_OPEN_WIN,
+          CMD_WIDGET_KEY,
+          CMD_QUOTE,
           pageName,
-          COMMAND_QUOTE,
-
-          COMMAND_END);
-
+          CMD_QUOTE,
+          CMD_END);
+  Serial.println(cmdFormat2);
   if (mySerial)
-  {
     mySerial->writeIt(cmdFormat2);
-  }
-};
+}
 
 /**
  * setRadioButtonTrue
@@ -449,85 +444,47 @@ void MyStone::laodView(const char *pageName)
  * Active un bouton radio.
  * Cette fonction envoie une commande pour définir un bouton radio comme étant sélectionné.
  *
+ * @date Dernière mise à jour : 21/03/2025
+ *
  * @param radioButtonName Le nom du bouton radio à activer.
  */
 void MyStone::setRadioButtonTrue(const char *radioButtonName)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_VALUE,
-
-          COMMAND_TYPE,
-          COMMAND_RADIO_BUTTON,
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          radioButtonName,
-          COMMAND_QUOTE,
-
-          COMMAND_VALUE,
-          "true",
-
-          COMMAND_END);
-
+  String command = generateCmd(CMD_SET_VALUE, CMD_RADIO_BUTTON, radioButtonName, CMD_VALUE, "true");
   if (mySerial)
-    mySerial->writeIt(cmdFormat2);
-};
-
-void MyStone::setEnable(const char *widget, bool enable)
-{
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_ENABLE,
-
-          COMMAND_TYPE,
-          "\"widget\"",
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          widget,
-          COMMAND_QUOTE,
-
-          COMMAND_ENABLE,
-          enable ? "true" : "false",
-
-          COMMAND_END);
-
-  if (mySerial)
-  {
-    Serial.println(cmdFormat2);
-    mySerial->writeIt(cmdFormat2);
-  }
+    mySerial->writeIt(command.c_str());
 }
 
+/**
+ * setEnable
+ *
+ * Rend actif ou inactif un élément ,"widget", de l'écran Stone.
+ *
+ * @date Création : 21/03/2025
+ *
+ * @param widget Le nom de l'élément à activer ou désactiver.
+ * @param enable true pour activer, false pour désactiver.
+ */
+void MyStone::setEnable(const char *widget, bool enable)
+{
+  String command = generateCmd(CMD_SET_ENABLE, "\"widget\"", widget, CMD_ENABLE, enable ? "true" : "false");
+  if (mySerial)
+    mySerial->writeIt(command.c_str());
+}
+
+/**
+ * setVisible
+ *
+ * Rend visible ou invisible un élément ,"widget", de l'écran Stone.
+ *
+ * @date Création : 21/03/2025
+ *
+ * @param widget Le nom de l'élément.
+ * @param enable true pour visible, false pour invisible.
+ */
 void MyStone::setVisible(const char *widget, bool enable)
 {
-  char cmdFormat2[1024];
-  sprintf(cmdFormat2, "%s%s%s%s%s%s%s%s%s%s%s",
-          COMMAND_BEGIN,
-
-          COMMAND_SET_VISIBLE,
-
-          COMMAND_TYPE,
-          "\"widget\"",
-
-          COMMAND_WINDGET,
-          COMMAND_QUOTE,
-          widget,
-          COMMAND_QUOTE,
-
-          COMMAND_VISIBLE,
-          enable ? "true" : "false",
-
-          COMMAND_END);
-
+  String command = generateCmd(CMD_SET_VISIBLE, CMD_WIDGET_TYPE, widget, CMD_VISIBLE, enable ? "true" : "false");
   if (mySerial)
-  {
-    Serial.println(cmdFormat2);
-    mySerial->writeIt(cmdFormat2);
-  }
+    mySerial->writeIt(command.c_str());
 }

@@ -3,11 +3,10 @@
  * Des méthodes supplémentaires sont ajoutées
  * @file MyStone.h
  * @author Lecourt Quentin
- * @cite Depuis la base de MyStone de Alain Dubé
  * @brief Declaration de la classe MyStone
- * @version 1.4
+ * @version 2.0
  * @date Création : 01/10/2024
- * @date Dernière mise à jour : 26/11/2024
+ * @date Dernière mise à jour : 21/03/2025
  */
 #ifndef MYSTONE_H
 #define MYSTONE_H
@@ -26,33 +25,41 @@ private:
     bool readTail();
 
     // Element de structure d'un message UART avec le Stone
-    // Capsule de reception
-    static const char *COMMAND_HEADER;
-    static const char *COMMAND_TAIL;
+    /*----------------- CAPSULE -----------------*/
+    static const char *CMD_HEADER;
+    static const char *CMD_TAIL;
     // Capsule d'envoie
-    static const char *COMMAND_BEGIN;
-    static const char *COMMAND_END;
-    // Les commandes
-    static const char* COMMAND_SET_VISIBLE;
-    static const char* COMMAND_SET_ENABLE;
-    static const char *COMMAND_SET_TEXT;
-    static const char *COMMAND_SET_VALUE;
-    static const char *COMMAND_GET_TEXT;
-    static const char *COMMAND_OPEN_WIN;
-    static const char *COMMAND_BACK_WIN;
-    // Les types de windgets
-    static const char *COMMAND_TYPE; // Pour designer le type
-    static const char *COMMAND_EDIT;
-    static const char *COMMAND_BUTTON;
-    static const char *COMMAND_LABEL;
-    static const char *COMMAND_TEXT;
-    static const char *COMMAND_RADIO_BUTTON;
-    // Autres
-    static const char *COMMAND_WINDGET;
-    static const char *COMMAND_VALUE;
-    static const char *COMMAND_QUOTE;
-    static const char* COMMAND_ENABLE;
-    static const char* COMMAND_VISIBLE;
+    static const char *CMD_BEGIN;
+    static const char *CMD_END;
+
+    /*----------------- COMMAND CODE -----------------*/
+    static const char *CMD_SET_VISIBLE;
+    static const char *CMD_SET_ENABLE;
+    static const char *CMD_SET_TEXT;
+    static const char *CMD_SET_VALUE;
+    static const char *CMD_GET_TEXT;
+    static const char *CMD_OPEN_WIN;
+    static const char *CMD_BACK_WIN;
+
+    /*----------------- WIDGET TYPE -----------------*/
+    static const char *CMD_TYPE; // Pour designer le type
+    static const char *CMD_EDIT;
+    static const char *CMD_BUTTON;
+    static const char *CMD_LABEL;
+    static const char *CMD_TEXT;
+    static const char *CMD_RADIO_BUTTON;
+    static const char *CMD_WIDGET_TYPE;
+
+    /*----------------- KEYS & VALUES-----------------*/
+    static const char *CMD_WIDGET_KEY;
+    static const char *CMD_VALUE;
+    static const char *CMD_ENABLE;
+    static const char *CMD_VISIBLE;
+
+    /*----------------- OTHERS -----------------*/
+    static const char *CMD_QUOTE;
+
+    String generateCmd(const char *cmdCode, const char *type, const char *widget, const char *key, const char *value);
 
 public:
     MyStone(int speed, uint32_t config, int rxd, int txd);
@@ -67,7 +74,7 @@ public:
     void setTipsEdit(const char *editName, const char *tips);
     void setRadioButtonTrue(const char *radioButtonName);
 
-    void laodView(const char *pageName);
+    void loadView(const char *pageName);
 
     void setEnable(const char *widgetName, bool enable);
     void setVisible(const char *widgetName, bool enable);
