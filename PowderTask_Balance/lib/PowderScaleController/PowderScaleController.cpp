@@ -44,7 +44,7 @@ bool PowderScaleController::init()
     // Verification de la communication avec le HX711
     if (scaleClass == nullptr)
     {
-        myStone->laodView("pup_alerte");
+        myStone->loadView("pup_alerte");
         myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'instanciation");
         myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'instancier la classe de la balance !");
         // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
@@ -52,7 +52,7 @@ bool PowderScaleController::init()
     }
     if (!scaleClass->init(400, 100))
     {
-        myStone->laodView("pup_alerte");
+        myStone->loadView("pup_alerte");
         myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'initialisation");
         myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'intialiser la balance !");
         // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
@@ -81,16 +81,16 @@ bool PowderScaleController::init()
     scaleClass->set_scale(scale);
     scaleClass->tare(); // Réinitialiser le poids à zéro
     delay(1000);
-    myStone->laodView("w_dashbord");
+    myStone->loadView("w_dashbord");
     delay(1000);
-    myStone->laodView("overlay_layout");
+    myStone->loadView("overlay_layout");
     return true;
 }
 
 void PowderScaleController::connectToWiFi()
 {
     Serial.println("Connecting to Wi-Fi...");
-    
+
     WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED)
@@ -110,6 +110,7 @@ void PowderScaleController::connectToMqtt()
         {
             Serial.println("Connected to MQTT");
             mqttClient->subscribe("test");
+            mqttClient->publish("test", "Nouvelle connexion");
         }
         else
         {
@@ -142,28 +143,29 @@ void PowderScaleController::lookingForDatas()
 void PowderScaleController::loop()
 {
     lookingForDatas();
-  if (!mqttClient->connected()) {
-    connectToMqtt();
-  }
-  mqttClient->loop();
-  
-  if (scaleClass->is_ready())
-  {            // Lire la valeur brute de l'ADC
-    float weight = scaleClass->get_units_kg(30);
+    if (!mqttClient->connected())
+    {
+        connectToMqtt();
+    }
+    mqttClient->loop();
 
-    Serial.print("Poids : ");
-    Serial.print(weight);
-    Serial.println(" Kg");
-    myStone->setTextLabel("lbl_weight",floatToChar(weight));
-    mqttClient->publish("test",floatToChar(weight));
-    Serial.print("Valeur brute : ");
-    Serial.println(scaleClass->get_units_g(1));
-    delay(1000);
-  }
-  else
-  {
-    Serial.println("Erreur : Impossible de lire les données du HX711 !");
-  }
+    if (scaleClass->is_ready())
+    { // Lire la valeur brute de l'ADC
+        float weight = scaleClass->get_units_kg(30);
 
-  delay(100);
+        Serial.print("Poids : ");
+        Serial.print(weight);
+        Serial.println(" Kg");
+        myStone->setTextLabel("lbl_weight", floatToChar(weight));
+        mqttClient->publish("test", floatToChar(weight));
+        Serial.print("Valeur brute : ");
+        Serial.println(scaleClass->get_units_g(1));
+        delay(1000);
+    }
+    else
+    {
+        Serial.println("Erreur : Impossible de lire les données du HX711 !");
+    }
+
+    delay(100);
 }

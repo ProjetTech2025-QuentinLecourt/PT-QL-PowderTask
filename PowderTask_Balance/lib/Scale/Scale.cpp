@@ -46,8 +46,9 @@ bool Scale::init(int _loop = 300, int _delay = 100) {
     return true;
 }
 
-void Scale::set_scale(float scale){
-    _scale = scale;
+void Scale::set_scale(float _scale){
+    _scale = _scale;
+    scale->set_scale(_scale);
 }
 void Scale::set_tare(byte tare){
     _tare = tare;
