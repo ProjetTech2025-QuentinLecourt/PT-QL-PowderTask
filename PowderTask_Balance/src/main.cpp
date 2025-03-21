@@ -10,7 +10,7 @@ controllerInit CONTROLLER_INIT = {
     25,
     // Scale params
     21.7074f,
-    20,
+    10,
     // Stone
     115200,
     16,
@@ -31,6 +31,7 @@ PowderScaleController *powderScaleController = nullptr;
 void setup()
 {
   Serial.begin(ESP_SPEED); // Initialiser la communication série
+  Serial.println("Initialisation du contrôleur de balance...");
   powderScaleController = new PowderScaleController(CONTROLLER_INIT);
   if (powderScaleController == nullptr)
   {
@@ -48,5 +49,5 @@ void setup()
 void loop()
 {
   powderScaleController->loop();
-  delay(100);
+  delay(1000);
 }

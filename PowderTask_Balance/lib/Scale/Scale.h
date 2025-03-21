@@ -19,7 +19,7 @@ class Scale
         const float DEFAULT_SCALE = 21.7074f;
         const byte DEFAULT_TARE = 20;
 
-        HX711 *scale = nullptr;
+        HX711 *scaleHX711 = nullptr;
         int _dt;
         int _sck;
         float _scale;

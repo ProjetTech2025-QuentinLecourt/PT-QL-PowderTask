@@ -76,13 +76,12 @@ bool PowderScaleController::init()
 
     // Se connecter au broker MQTT
     connectToMqtt();
-    delay(100);
+    delay(10);
 
     scaleClass->set_scale(scale);
     scaleClass->tare(); // Réinitialiser le poids à zéro
-    delay(1000);
+    delay(10);
     myStone->loadView("w_dashbord");
-    delay(1000);
     myStone->loadView("overlay_layout");
     return true;
 }
@@ -151,7 +150,8 @@ void PowderScaleController::loop()
 
     if (scaleClass->is_ready())
     { // Lire la valeur brute de l'ADC
-        float weight = scaleClass->get_units_kg(30);
+        Serial.println("Lecture de la balance...");
+        float weight = scaleClass->get_units_kg(20);
 
         Serial.print("Poids : ");
         Serial.print(weight);
@@ -160,12 +160,9 @@ void PowderScaleController::loop()
         mqttClient->publish("test", floatToChar(weight));
         Serial.print("Valeur brute : ");
         Serial.println(scaleClass->get_units_g(1));
-        delay(1000);
     }
     else
     {
         Serial.println("Erreur : Impossible de lire les données du HX711 !");
     }
-
-    delay(100);
 }
