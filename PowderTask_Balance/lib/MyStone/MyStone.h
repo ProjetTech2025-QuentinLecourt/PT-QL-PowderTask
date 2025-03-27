@@ -74,7 +74,7 @@ public:
     void setTipsEdit(const char *editName, const char *tips);
     void setRadioButtonTrue(const char *radioButtonName);
 
-    void loadView(const char *pageName);
+    void setView(const char *pageName);
 
     void setEnable(const char *widgetName, bool enable);
     void setVisible(const char *widgetName, bool enable);

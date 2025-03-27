@@ -424,7 +424,7 @@ void MyStone::setTipsEdit(const char *editName, const char *tips)
  *
  * @param pageName Le nom de la page à afficher. Par défaut : "home_page".
  */
-void MyStone::loadView(const char *pageName)
+void MyStone::setView(const char *pageName)
 {
   pageName = strlen(pageName) ? pageName : "home_page";
   char cmdFormat2[1024];

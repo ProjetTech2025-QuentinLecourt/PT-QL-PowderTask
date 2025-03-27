@@ -46,6 +46,10 @@ public:
     void onMqttMessage(char *topic, byte *payload, unsigned int length);
     void lookingForDatas();
     void loop();
+
+    bool setupScaleBalance();
+    void makeNewMeasure();
+    void makeFinalMeasure();
 };
 
 #endif
