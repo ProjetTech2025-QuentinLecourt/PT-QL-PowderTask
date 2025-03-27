@@ -35,6 +35,93 @@ PowderScaleController::~PowderScaleController()
     delete mqttClient;
 }
 
+/**
+ * @brief Initialise au premier démarrage les variables stockées vides.
+ */
+void PowderScaleController::initEEPROM()
+{
+    if (EEPROM.read(SSID_OFFSET) == 0xFF)
+    {
+        saveString(SSID_OFFSET, "");
+        saveString(PASSWORD_OFFSET, "");
+    }
+}
+
+/**
+ * @brief SVérifie si la chaîne de caractère est vide ou non conforme
+ *
+ * @param str Chaîne de caractères
+ */
+bool PowderScaleController::isStringValid(const String &str)
+{
+    if (str.length() == 0)
+        return false;
+    for (unsigned int i = 0; i < str.length(); i++)
+    {
+        if (!isprint(str[i]))
+            return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Sauvegarde une chaîne de caractères dans l'EEPROM
+ *
+ * @param offset Adresse de départ dans l'EEPROM pour la sauvegarde
+ * @param str Chaîne de caractères à sauvegarder
+ */
+void PowderScaleController::saveString(int offset, const String &str)
+{
+    for (int i = 0; i < str.length(); i++)
+    {
+        EEPROM.write(offset + i, str[i]);
+    }
+    EEPROM.write(offset + str.length(), '\0');
+    EEPROM.commit();
+}
+
+/**
+ * @brief Lit une chaîne de caractères depuis l'EEPROM
+ *
+ * @param offset Adresse de départ dans l'EEPROM pour la lecture
+ * @return String La chaîne de caractères lue
+ */
+String PowderScaleController::readString(int offset)
+{
+    String str;
+    char c;
+    int i = 0;
+    while ((c = EEPROM.read(offset + i)) != '\0' && i < 256)
+    { // Limite de sécurité
+        str += c;
+        i++;
+    }
+    return (i > 0) ? str : "";
+}
+
+/**
+ * @brief Sauvegarde une valeur enum (8 bits non signés) dans l'EEPROM
+ *
+ * @param offset Adresse dans l'EEPROM pour la sauvegarde
+ * @param value Valeur enum à sauvegarder (uint8_t)
+ */
+void PowderScaleController::saveEnum(int offset, uint8_t value)
+{
+    EEPROM.write(offset, value);
+    EEPROM.commit();
+}
+
+/**
+ * @brief Lit une valeur enum (8 bits non signés) depuis l'EEPROM
+ *
+ * @param offset Adresse dans l'EEPROM pour la lecture
+ * @return uint8_t La valeur enum lue
+ */
+uint8_t PowderScaleController::readEnum(int offset)
+{
+    return EEPROM.read(offset);
+}
+
 bool PowderScaleController::init()
 {
     if (myStone == nullptr)
@@ -62,6 +149,8 @@ bool PowderScaleController::init()
     delete scaleClass;
     scaleClass = nullptr;
 
+    EEPROM.begin(EEPROM_SIZE);
+    initEEPROM();
     // Se connecter au Wi-Fi
     connectToWiFi();
 
@@ -87,7 +176,13 @@ void PowderScaleController::connectToWiFi()
 {
     Serial.println("Connecting to Wi-Fi...");
 
-    WiFi.begin(ssid, password);
+    String savedSSID = readString(SSID_OFFSET);
+    String savedPassword = readString(WIFI_PASSWORD_OFFSET);
+
+    const char *ssidUsed = (isStringValid(savedSSID)) ? savedSSID.c_str() : ssid;
+    const char *passwordUsed = (isStringValid(savedPassword)) ? savedPassword.c_str() : password;
+
+    WiFi.begin(ssidUsed, passwordUsed);
 
     while (WiFi.status() != WL_CONNECTED)
     {
