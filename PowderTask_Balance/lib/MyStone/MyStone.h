@@ -4,9 +4,9 @@
  * @file MyStone.h
  * @author Lecourt Quentin
  * @brief Declaration de la classe MyStone
- * @version 2.0
+ * @version 2.0.1
  * @date Création : 01/10/2024
- * @date Dernière mise à jour : 21/03/2025
+ * @date Dernière mise à jour : 27/03/2025
  */
 #ifndef MYSTONE_H
 #define MYSTONE_H
@@ -40,6 +40,7 @@ private:
     static const char *CMD_GET_TEXT;
     static const char *CMD_OPEN_WIN;
     static const char *CMD_BACK_WIN;
+    static const char *CMD_SET_IMAGE;
 
     /*----------------- WIDGET TYPE -----------------*/
     static const char *CMD_TYPE; // Pour designer le type
@@ -49,12 +50,14 @@ private:
     static const char *CMD_TEXT;
     static const char *CMD_RADIO_BUTTON;
     static const char *CMD_WIDGET_TYPE;
+    static const char *CMD_IMAGE;
 
     /*----------------- KEYS & VALUES-----------------*/
     static const char *CMD_WIDGET_KEY;
     static const char *CMD_VALUE;
     static const char *CMD_ENABLE;
     static const char *CMD_VISIBLE;
+    static const char *CMD_IMAGE_KEY;
 
     /*----------------- OTHERS -----------------*/
     static const char *CMD_QUOTE;
@@ -73,6 +76,7 @@ public:
     void setTextButton(const char *buttonName, const char *text);
     void setTipsEdit(const char *editName, const char *tips);
     void setRadioButtonTrue(const char *radioButtonName);
+    void setImage(const char* widgetName,const char* imageName);
 
     void setView(const char *pageName);
 
