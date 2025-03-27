@@ -348,8 +348,8 @@ String MyStone::generateCmd(const char *cmdCode, const char *type, const char *w
           CMD_END);
 
   // Debug
-  Serial.println(cmdFormat);
-  Serial.println("");
+  // Serial.println(cmdFormat);
+  // Serial.println("");
   return String(cmdFormat);
 }
 
