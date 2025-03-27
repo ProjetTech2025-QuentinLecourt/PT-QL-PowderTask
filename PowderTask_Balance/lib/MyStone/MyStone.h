@@ -4,7 +4,7 @@
  * @file MyStone.h
  * @author Lecourt Quentin
  * @brief Declaration de la classe MyStone
- * @version 2.0.1
+ * @version 2.0.2
  * @date Création : 01/10/2024
  * @date Dernière mise à jour : 27/03/2025
  */
@@ -41,6 +41,7 @@ private:
     static const char *CMD_OPEN_WIN;
     static const char *CMD_BACK_WIN;
     static const char *CMD_SET_IMAGE;
+    static const char *CMD_SET_BUZZER;
 
     /*----------------- WIDGET TYPE -----------------*/
     static const char *CMD_TYPE; // Pour designer le type
@@ -51,6 +52,7 @@ private:
     static const char *CMD_RADIO_BUTTON;
     static const char *CMD_WIDGET_TYPE;
     static const char *CMD_IMAGE;
+    static const char *CMD_SYSTEM;
 
     /*----------------- KEYS & VALUES-----------------*/
     static const char *CMD_WIDGET_KEY;
@@ -58,6 +60,7 @@ private:
     static const char *CMD_ENABLE;
     static const char *CMD_VISIBLE;
     static const char *CMD_IMAGE_KEY;
+    static const char *CMD_TIME;
 
     /*----------------- OTHERS -----------------*/
     static const char *CMD_QUOTE;
@@ -82,5 +85,6 @@ public:
 
     void setEnable(const char *widgetName, bool enable);
     void setVisible(const char *widgetName, bool enable);
+    void setBuzzer(u_int time);
 };
 #endif

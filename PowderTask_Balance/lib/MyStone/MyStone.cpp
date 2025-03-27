@@ -4,7 +4,7 @@
  * @file MyStone.cpp
  * @author Lecourt Quentin
  * @brief Methode de la classe MyStone
- * @version 2.0.1
+ * @version 2.0.2
  * @date Création : 01/10/2024
  * @date Dernière mise à jour : 27/03/2025
  */
@@ -41,6 +41,8 @@ const char *MyStone::CMD_OPEN_WIN = "\"open_win\"";
 const char *MyStone::CMD_BACK_WIN = "\"back_win\"";
 // Frame set_image
 const char *MyStone::CMD_SET_IMAGE = "\"set_image\"";
+// Frame set_buzzer
+const char *MyStone::CMD_SET_BUZZER = "\"set_buzzer\"";
 
 /*----------------- WIDGET TYPE -----------------*/
 // Frame type
@@ -59,6 +61,8 @@ const char *MyStone::CMD_RADIO_BUTTON = "\"radio_button\"";
 const char *MyStone::CMD_WIDGET_TYPE = "\"widget\"";
 // Frame image
 const char *MyStone::CMD_IMAGE = "\"image\"";
+//Frame system
+const char *MyStone::CMD_SYSTEM = "\"system\"";
 
 /*----------------- KEYS & VALUES-----------------*/
 // Frame value
@@ -71,6 +75,8 @@ const char *MyStone::CMD_ENABLE = ",\"enable\":";
 const char *MyStone::CMD_VISIBLE = ",\"visible\":";
 // Frame image
 const char *MyStone::CMD_IMAGE_KEY = ",\"image\":";
+// Frame time
+const char *MyStone::CMD_TIME = ",\"time\":";
 
 /*----------------- OTHERS -----------------*/
 // Frame guillements
@@ -342,8 +348,8 @@ String MyStone::generateCmd(const char *cmdCode, const char *type, const char *w
           CMD_END);
 
   // Debug
-   Serial.println(cmdFormat);
-   Serial.println("");
+  Serial.println(cmdFormat);
+  Serial.println("");
   return String(cmdFormat);
 }
 
@@ -511,5 +517,29 @@ void MyStone::setImage(const char *widgetName, const char *imageName)
 {
   String command = generateCmd(CMD_SET_IMAGE, CMD_IMAGE, widgetName, CMD_IMAGE_KEY, imageName);
   if (mySerial)
-    mySerial->writeIt( command.c_str());
+    mySerial->writeIt(command.c_str());
+}
+
+/**
+ * setBuzzer
+ *
+ * Active le buzzer de l'écran pour un temps : "time"
+ *
+ * @date Création : 27/03/2025
+ *
+ * @param time Temps en millisecondes pour lequel le buzzer produit un son.
+ */
+void MyStone::setBuzzer(uint time)
+{
+  char cmdFormat2[1024];
+  sprintf(cmdFormat2, "%s%s%s%s%s%d%s",
+          CMD_BEGIN,
+          CMD_SET_BUZZER,
+          CMD_TYPE,
+          CMD_SYSTEM,
+          CMD_TIME,
+          time,
+          CMD_END);
+  if (mySerial)
+    mySerial->writeIt(cmdFormat2);
 }
