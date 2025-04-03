@@ -38,12 +38,39 @@ PowderScaleController::~PowderScaleController()
 /**
  * @brief Initialise au premier démarrage les variables stockées vides.
  */
-void PowderScaleController::initEEPROM()
+void PowderScaleController::initEEPROM(bool forced)
 {
-    if (EEPROM.read(SSID_OFFSET) == 0xFF)
+    // Initialisation des offsets de connexion internet
+    if ((EEPROM.read(SSID_OFFSET) == 0xFF) || forced)
     {
         saveString(SSID_OFFSET, "");
-        saveString(PASSWORD_OFFSET, "");
+        saveString(WIFI_PASSWORD_OFFSET, "");
+    }
+    // Initialisation des offsets de connexion utilisateur
+    if ((EEPROM.read(EMAIL_OFFSET) == 0xFF) || forced)
+    {
+        saveString(EMAIL_OFFSET, "");
+        saveString(LOGIN_PASSWORD_OFFSET, "");
+    }
+    // Initialisation de l'offset du JWT
+    if ((EEPROM.read(JWT_OFFSET) == 0xFF) || forced)
+    {
+        saveString(JWT_OFFSET, "");
+    }
+    // Initialisation de l'offset de la langue
+    if ((EEPROM.read(LANGUAGE_OFFSET) == 0xFF) || forced)
+    {
+        saveEnum(LANGUAGE_OFFSET, FRENCH);
+    }
+    // Initialisation de l'offset de l'unité de la masse
+    if ((EEPROM.read(WEIGHT_UNITE_OFFSET) == 0xFF) || forced)
+    {
+        saveEnum(WEIGHT_UNITE_OFFSET, UNITY_KG);
+    }
+    // Initialisation de l'offset d'installation
+    if ((EEPROM.read(INSTALLATION_OFFSET) == 0xFF) || forced)
+    {
+        saveEnum(WEIGHT_UNITE_OFFSET, NOT_INSTALL);
     }
 }
 
@@ -146,11 +173,12 @@ bool PowderScaleController::init()
         return false;
     }
     // Suppression de la classe Scale suite à la verification
-    delete scaleClass;
-    scaleClass = nullptr;
+    // delete scaleClass;
+    // scaleClass = nullptr;
 
     EEPROM.begin(EEPROM_SIZE);
-    initEEPROM();
+    (readEnum(INSTALLATION_OFFSET) == NOT_INSTALL) ? initEEPROM(true) : initEEPROM(false);
+    
     // Se connecter au Wi-Fi
     connectToWiFi();
 
@@ -234,6 +262,7 @@ void PowderScaleController::lookingForDatas()
 void PowderScaleController::loop()
 {
     lookingForDatas();
+
     if (!mqttClient->connected())
     {
         connectToMqtt();

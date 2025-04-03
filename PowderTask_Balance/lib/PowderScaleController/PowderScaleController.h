@@ -9,18 +9,26 @@
 #include "MyStone.h"
 #include "Convertor.h"
 #include "Structs.h"
+#include "Enums.cpp"
 #include <EEPROM.h>
 
 #define EEPROM_SIZE 512  // Taille max ESP32 (4 Ko possible)
 
 // Offsets (plage d'octect pour chaque données)
-#define EMAIL_OFFSET        0
-#define PASSWORD_OFFSET     64
-#define JWT_OFFSET          128
-#define SSID_OFFSET         384
-#define WIFI_PASSWORD_OFFSET 416
-#define LANGUAGE_OFFSET      480
-#define WEIGHT_TYPE_OFFSET   481
+#define EMAIL_OFFSET            0
+#define LOGIN_PASSWORD_OFFSET   64
+#define JWT_OFFSET              128
+#define SSID_OFFSET             384
+#define WIFI_PASSWORD_OFFSET    416
+#define LANGUAGE_OFFSET         480
+#define WEIGHT_UNITE_OFFSET     481
+#define INSTALLATION_OFFSET     482
+
+enum INSTALL_STATE {
+    NOT_INSTALL,
+    INSTALL
+};
+
 
 
 class PowderScaleController
@@ -50,15 +58,12 @@ private:
     WiFiClientSecure *wifiClient = nullptr;
     PubSubClient *mqttClient = nullptr;
 
-    void initEEPROM();
+    void initEEPROM(bool forced);
     bool isStringValid(const String &str);
-
     void saveString(int offset, const String &str);
     String readString(int offset);
-
     void saveEnum(int offset, uint8_t value);
     uint8_t readEnum(int offset);
-
     void clearEEPROM();
 
 public:
