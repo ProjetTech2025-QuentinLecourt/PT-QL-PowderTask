@@ -18,14 +18,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PodwerTask_Mobile"
+        android:theme="@style/Theme.App.TransparentNav"
         tools:targetApi="31">
         <!-- Déclarer LoginActivity -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.PodwerTask_Mobile">
+            android:theme="@style/Theme.App.TransparentNav" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
