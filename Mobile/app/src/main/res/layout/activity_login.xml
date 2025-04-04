@@ -11,11 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
         <ImageView
             android:layout_width="160dp"
             android:layout_height="160dp"
+            android:importantForAccessibility="no"
             android:src="@drawable/icon_login_account"/>
 
         <EditText
@@ -23,25 +25,27 @@
             android:layout_marginTop="32dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:importantForAutofill="no"
             android:textColor="@color/bleu_gestion"
             android:textColorHint="@color/bleu_gestion"
             android:textSize="24sp"
             android:background="@drawable/rounded_corner"
             android:padding="18dp"
             android:inputType="textEmailAddress"
-            android:hint="Identifiant" />
+            android:hint="@string/login_id" />
 
         <EditText
             android:id="@+id/edt_password"
             android:layout_marginTop="32dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:importantForAutofill="no"
             android:textColor="@color/black"
             android:textColorHint="@color/bleu_gestion"
             android:textSize="24sp"
             android:background="@drawable/rounded_corner"
             android:padding="18dp"
-            android:hint="Mot de passe"
+            android:hint="@string/login_password"
             android:inputType="textPassword" />
 
         <Button
@@ -54,7 +58,7 @@
             android:padding="18dp"
             android:textSize="24sp"
             android:radius="24dp"
-            android:text="Connexion" />
+            android:text="@string/connection" />
 
 
     </LinearLayout>

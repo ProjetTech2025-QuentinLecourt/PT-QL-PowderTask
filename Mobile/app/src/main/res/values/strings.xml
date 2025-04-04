@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Powder Scale Mobile</string>
+
+    <!-- Login -->
+    <string name="connection">Connexion</string>
+    <string name="login_id">Identifiant</string>
+    <string name="login_password">Mot de passe</string>
+
+    <!-- Home Page -->
+    <string name="welcome_user">Bienvenue sur l\'interface utilisateur</string>
+    <string name="welcome_admin">Bienvenue sur l\'interface administrateur</string>
+    <string name="devices_list">Liste des appareils</string>
+    <string name="continue_to_devices_list">Continuer pour connaitre l\'état des appareils</string>
+
+    <!-- Devices List Page -->
+
+
+
 </resources>

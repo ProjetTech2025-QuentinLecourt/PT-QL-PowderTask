@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
         <TextView
             android:layout_width="match_parent"
@@ -21,7 +22,7 @@
             android:textSize="24sp"
             android:textAlignment="center"
             android:textColor="@color/bleu_gestion_visible"
-            android:text="Bienvenue sur l'interface utilisateur" />
+            android:text="@string/welcome_user" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,7 +31,7 @@
             android:textSize="24sp"
             android:textAlignment="center"
             android:textColor="@color/mauve_constraste"
-            android:text="Utilisateur" />
+            android:text="" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,7 +40,7 @@
             android:textSize="24sp"
             android:textAlignment="center"
             android:textColor="@color/bleu_gestion_visible"
-            android:text="Continuer pour connaitre l'état des appareils" />
+            android:text="@string/continue_to_devices_list" />
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,7 +48,7 @@
             android:background="@color/rouge_cerise_mur_t"
             android:textColor="@color/white"
             android:textSize="24sp"
-            android:text="Liste des appareils"/>
+            android:text="@string/devices_list"/>
 
     </LinearLayout>
 
