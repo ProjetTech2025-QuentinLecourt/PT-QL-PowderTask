@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/user_background"
+    android:gravity="center"
+    android:padding="16dp">
+   <!-- tools:context=".HomeActivity"-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_h_welcome"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:textColor="@color/bleu_gestion_visible"
+            android:text="Bienvenue sur l'interface utilisateur" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:id="@+id/tv_h_username"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:textColor="@color/mauve_constraste"
+            android:text="Utilisateur" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:id="@+id/tv_h_consigne"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:textColor="@color/bleu_gestion_visible"
+            android:text="Continuer pour connaitre l'état des appareils" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@color/rouge_cerise_mur_t"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:text="Liste des appareils"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

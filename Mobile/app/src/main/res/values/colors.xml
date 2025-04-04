@@ -4,10 +4,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="bleu_gestion_t">#3E5AA4FF</color>
     <color name="bleu_gestion">#AE65BEFF</color>
+    <color name="bleu_gestion_visible">#AE1F6098</color>
     <color name="orange_chalereux">#FF9A5A</color>
     <color name="mauve_constraste">#FF95BA</color>
     <color name="bleu_frais">#84F5FB</color>
     <color name="vert_slime">#7EFF5A</color>
     <color name="rouge_cerise_mur">#D1003B</color>
+    <color name="rouge_cerise_mur_t">#80D1003B</color>
     <color name="orange_pemplemouse">#EF522D</color>
 </resources>
