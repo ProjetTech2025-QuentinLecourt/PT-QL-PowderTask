@@ -48,7 +48,7 @@
             android:background="@color/rouge_cerise_mur_t"
             android:textColor="@color/white"
             android:textSize="24sp"
-            android:text="@string/devices_list"/>
+            android:text="@string/devicesList_title"/>
 
     </LinearLayout>
 

@@ -9,11 +9,22 @@
     <!-- Home Page -->
     <string name="welcome_user">Bienvenue sur l\'interface utilisateur</string>
     <string name="welcome_admin">Bienvenue sur l\'interface administrateur</string>
-    <string name="devices_list">Liste des appareils</string>
+    <string name="devicesList_title">Liste des appareils</string>
     <string name="continue_to_devices_list">Continuer pour connaitre l\'état des appareils</string>
 
-    <!-- Devices List Page -->
+    <!-- Devices Cart List & Filters -->
+    <string name="checkBox_onlineDevices">Appareils en lignes</string>
+    <string name="checkBox_withProblemDevices">Appareils avec problèmes</string>
+    <string name="desc_filter">Filtre</string>
 
+    <!-- Devices Cart -->
+    <string name="online">En ligne</string>
+    <string name="offline">Hors ligne</string>
 
+    <string name="accelerometer">Accéléromètre</string>
+    <string name="weight_sensor">Capteurs de poids</string>
 
+    <string name="status_fonctional">Fonctionnel</string>
+    <string name="status_problem">Défaillant</string>
+    <string name="status_unknow">\?</string>
 </resources>

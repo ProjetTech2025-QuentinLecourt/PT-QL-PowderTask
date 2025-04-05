@@ -1,11 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/user_background"
-    android:gravity="center"
     android:padding="16dp">
-    <!-- tools:context=".MaterialsStatus"-->
+    <!-- tools:context=".HomeActivity"-->
+    <LinearLayout
+        android:id="@+id/linearLayout_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/return_from_devicesListPage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/return_arrow"
+            android:layout_marginEnd="16dp" />
+
+
+        <TextView
+            android:id="@+id/tv_devicesListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/devicesList_title"
+            android:textAlignment="center"
+            android:textColor="@color/bleu_gestion_visible"
+            android:textSize="32sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout_filters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayout_title"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+    <LinearLayout
+            android:id="@+id/linearLayout_checkBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingEnd="8dp">
+
+            <CheckBox
+                android:id="@+id/checkBox_onlineDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/checkBox_onlineDevices"
+                android:textColor="@color/bleu_gestion_visible"
+                android:textSize="16sp"
+                android:buttonTint="@color/bleu_gestion_visible" />
+
+            <CheckBox
+                android:id="@+id/checkBox_problemDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:text="@string/checkBox_withProblemDevices"
+                android:textColor="@color/bleu_gestion_visible"
+                android:textSize="16sp"
+                android:buttonTint="@color/bleu_gestion_visible" />
+        </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/filterImage"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/icon_filter"
+                android:contentDescription="@string/desc_filter" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView_machines"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayout_filters"
+        android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+
+</RelativeLayout>
