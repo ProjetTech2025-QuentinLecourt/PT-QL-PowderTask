@@ -46,19 +46,19 @@ class MachineAdapter(private val machines: List<Machine>) : RecyclerView.Adapter
             )
 
             // Définir le statut des composants
-            holder.accelerometerStatus.text = if (currentMachine.isAccelerometerWorking) componentOk else componentNotOk
+            holder.accelerometerStatus.text = if (currentMachine.isSensorAccelerometerCorrect == true) componentOk else componentNotOk
             holder.accelerometerStatus.setBackground(
                 AppCompatResources.getDrawable(
                     holder.itemView.context,
-                    if (currentMachine.isAccelerometerWorking) R.drawable.online_status else R.drawable.offline_status
+                    if (currentMachine.isSensorAccelerometerCorrect == true) R.drawable.online_status else R.drawable.offline_status
                 )
             )
 
-            holder.weightSensorStatus.text = if (currentMachine.isWeightSensorWorking) componentOk else componentNotOk
+            holder.weightSensorStatus.text = if (currentMachine.isSensorWeightCorrect == true) componentOk else componentNotOk
             holder.weightSensorStatus.setBackground(
                 AppCompatResources.getDrawable(
                     holder.itemView.context,
-                    if (currentMachine.isWeightSensorWorking) R.drawable.online_status else R.drawable.offline_status
+                    if (currentMachine.isSensorWeightCorrect == true) R.drawable.online_status else R.drawable.offline_status
                 )
             )
         } else {

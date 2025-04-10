@@ -12,14 +12,14 @@
     <!--  Theme Colors  -->
     <color name="orange_chalereux">#FF9A5A</color>
     <color name="mauve_constraste">#FF95BA</color>
-    <color name="bleu_frais">#84F5FB</color>
-    <color name="vert_slime">#7EFF5A</color>
+    <color name="mauve_raisin">#C084FB</color>
+    <color name="vert_menthe">#5AFFA4</color>
     <color name="rouge_cerise_mur">#D1003B</color>
     <color name="rouge_cerise_mur_t">#80D1003B</color>
     <color name="orange_pemplemouse">#EF522D</color>
 
     <!-- Scale Status -->
     <color name="color_status_none">#74969696</color>
-    <color name="color_status_online">#7348FF78</color>
-    <color name="color_status_offline">#73FF5353</color>
+    <color name="color_status_online">#8023C43B</color>
+    <color name="color_status_offline">#80FF5353</color>
 </resources>

@@ -4,8 +4,11 @@ package com.quentinlecourt.podwertask_mobile.data.model
 data class Machine(
     val id: Int,
     val name: String,
-    val isOnline: Boolean = false,
-    val isAccelerometerWorking: Boolean,
-    val isWeightSensorWorking: Boolean,
-    val lastConnectionTime: Long
-)
+    var isOnline: Boolean = false,
+    var isSensorAccelerometerCorrect: Boolean? = null,
+    var isSensorWeightCorrect: Boolean? = null,
+    var lastConnectionTime: Long = 0
+) {
+    val hasAnyProblem: Boolean
+        get() = isSensorAccelerometerCorrect == false || isSensorWeightCorrect == false
+}
