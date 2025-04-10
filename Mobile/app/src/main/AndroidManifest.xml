@@ -8,6 +8,7 @@
     <!-- MQTT -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Traffic en dev avec l'API en http -->
     <!--android:usesCleartextTraffic="true"-->
     <application
         android:networkSecurityConfig="@xml/network_security_config"
