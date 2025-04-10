@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_backgroundHome"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -42,6 +43,7 @@
             android:textColor="@color/bleu_gestion_visible"
             android:text="@string/continue_to_devices_list" />
         <Button
+            android:id="@+id/btn_devicesList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -49,6 +51,15 @@
             android:textColor="@color/white"
             android:textSize="24sp"
             android:text="@string/devicesList_title"/>
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:background="@color/rouge_cerise_mur_t"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:text="Déconnexion"/>
 
     </LinearLayout>
 

@@ -8,10 +8,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.quentinlecourt.podwertask_mobile.data.adapter.MachineAdapter
+import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
 import com.quentinlecourt.podwertask_mobile.data.services.MqttManager
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class DevicesListActivity : AppCompatActivity() {
+
+    private val apiService: MyAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MyAPI::class.java)
+    }
 
     private lateinit var machineAdapter: MachineAdapter
     private var machines = mutableListOf<Machine>()

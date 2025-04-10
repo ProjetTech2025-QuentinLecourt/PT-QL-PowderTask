@@ -26,25 +26,28 @@
             android:name=".LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.App.TransparentNav" >
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-        </activity>
-        <activity android:name=".DevicesListActivity"
-                android:exported="true"
-                android:theme="@style/Theme.App.TransparentNav" >
             <intent-filter>
-             <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".DevicesListActivity"
+                android:exported="true"
+                android:theme="@style/Theme.App.TransparentNav" >
+        <!--            <intent-filter>
+                     <action android:name="android.intent.action.MAIN" />
 
-        <!-- Déclarer MainActivity -->
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>-->
+                </activity>
+
+                <!-- Déclarer MainActivity -->
         <activity
             android:name=".MainActivity"
+            android:exported="true" />
+        <activity
+            android:name=".HomeActivity"
             android:exported="true" />
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>

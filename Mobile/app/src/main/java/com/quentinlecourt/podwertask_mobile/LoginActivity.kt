@@ -1,7 +1,7 @@
 package com.quentinlecourt.podwertask_mobile
 
+import SessionManager
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
 
 class LoginActivity : AppCompatActivity() {
-
+    private lateinit var sessionManager: SessionManager
     private val apiService: MyAPI by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.API_BASE_URL)
@@ -26,39 +26,48 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        sessionManager = SessionManager(this)
+
+        // Vérifier si déjà connecté
+        if (sessionManager.fetchAuthToken() != null) {
+            navigateToHomePageActivity()
+            return
+        }
 
         val loginButton: Button = findViewById(R.id.btn_login)
         loginButton.setOnClickListener {
             val email = findViewById<EditText>(R.id.edt_username).text.toString()
             val password = findViewById<EditText>(R.id.edt_password).text.toString()
+
+            if (email.isBlank() || password.isBlank()) {
+                Toast.makeText(this, "Email/mot de passe requis", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             // Exécuter l'appel réseau dans un CoroutineScope
             lifecycleScope.launch {
                 try {
                     val loginRequest = LoginRequest(email, password)
                     val response = apiService.login(loginRequest)
 
-                    if (response.isSuccessful && response.code() == 200) {
-                        val loginResponse = response.body()
-                        if (loginResponse != null) {
-                            // Sauvegarder le token
-                            saveToken(loginResponse.bearerToken)
-                            // Afficher le message dans un Toast
-                            Toast.makeText(this@LoginActivity, loginResponse.message, Toast.LENGTH_SHORT).show()
-                            navigateToMainActivity()
-                        } else {
-                            Toast.makeText(this@LoginActivity, "Réponse vide", Toast.LENGTH_SHORT).show()
-                        }
+                    if (response.isSuccessful) {
+                        response.body()?.let { loginResponse ->
+                            // Sauvegarde des données de session
+                            sessionManager.saveAuthToken(loginResponse.bearerToken)
+                            sessionManager.saveUserEmail(email)
+
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Connecté avec succès",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            navigateToHomePageActivity()
+                        } ?: showError("Réponse vide du serveur")
                     } else {
-                        // Gérer les cas d'erreur HTTP
-                        Toast.makeText(
-                            this@LoginActivity,
-                            "Échec de l'authentification: ${response.code()}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        showError("Erreur: ${response.code()} - ${response.errorBody()?.string()}")
                     }
                 } catch (e: Exception) {
-                    // Gérer les erreurs réseau
-                    Toast.makeText(this@LoginActivity, "Erreur réseau: ${e.message}", Toast.LENGTH_SHORT).show()
+                    showError("Erreur réseau: ${e.localizedMessage}")
                 }
             }
         }
@@ -70,8 +79,8 @@ class LoginActivity : AppCompatActivity() {
         sharedPreferences.edit().putString("bearerToken", token).apply()
     }
 
-    private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+    private fun navigateToHomePageActivity() {
+        val intent = Intent(this, HomeActivity::class.java)
         startActivity(intent)
         finish()
     }

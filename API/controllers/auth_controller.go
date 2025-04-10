@@ -29,9 +29,24 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Get l'utilisateur ici
+	user, err := services.GetUserByEmail(userDtoLogin.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Erreur lors de la récupération de l'utilisateur",
+			"details": err.Error(),
+		})
+		return
+	}
 
-	bearerToken, err := services.GenereateToken("Test", userDtoLogin.Email, "CE")
+	if user.Job == "" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "Accès refusé",
+			"details": "Le rôle de l'utilisateur n'est pas défini",
+		})
+		return
+	}
+
+	bearerToken, err := services.GenereateToken(user.FirstName, userDtoLogin.Email, user.Job)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le token"})
 		return

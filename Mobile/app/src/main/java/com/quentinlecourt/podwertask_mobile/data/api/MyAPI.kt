@@ -7,6 +7,7 @@ import retrofit2.http.POST
 import retrofit2.http.Body
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Header
 
 /**
  * MyApi
@@ -16,6 +17,12 @@ interface MyAPI {
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
     @GET("mqtt")
-    suspend fun getMqttId(): Response<MqttIdResponse>
+    suspend fun getMqttId(
+        //@Header("Authorization") token: String
+    ): Response<MqttIdResponse>
+    //@GET("machines")
+    //suspend fun getMachines(
+    //    @Header("Authorization") token: String
+    //): Response<ScaleResponse>
 
 }
