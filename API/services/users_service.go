@@ -6,6 +6,7 @@ import (
 	"waiter-assist/models/dtos"
 	"waiter-assist/repositories"
 
+	"github.com/jinzhu/copier"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -58,4 +59,18 @@ func CreateUser(userDto *dtos.UserDto) (*dtos.UserDtoResponse, error) {
 		LastName:  user.LastName,
 		Email:     user.Email,
 	}, nil
+}
+
+func GetUserByEmail(email string) (*dtos.UserDto, error) {
+
+	userDao, err := repositories.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	userDto := &dtos.UserDto{}
+	err = copier.Copy(userDto, userDao)
+
+	return userDto, err
+
 }

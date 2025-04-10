@@ -12,6 +12,7 @@ func RegisterRoutes(r *gin.Engine) {
 	//Route pour le login
 	r.POST("/login", controllers.Login)
 	r.GET("/mqtt", midllewares.AuthMiddleware(), controllers.GetMQTTId)
+	r.GET("/machines", midllewares.AuthMiddleware(), controllers.GetMachines)
 
 	users := r.Group("/users")
 	{

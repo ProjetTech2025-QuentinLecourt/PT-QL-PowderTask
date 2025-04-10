@@ -19,7 +19,7 @@ func VerifyLoginJSON(userDtoLogin *dtos.UserDtoLogin) string {
 
 func AuthenticateUser(email string, password string) error {
 
-	user, err := repositories.GetUserbyEmail(email)
+	user, err := repositories.GetUserByEmail(email)
 	if err != nil {
 		return err
 	}

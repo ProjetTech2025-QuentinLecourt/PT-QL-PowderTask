@@ -14,7 +14,7 @@ func CreateUser(user *daos.User) error {
 	return nil
 }
 
-func GetUserbyEmail(email string) (*daos.User, error) {
+func GetUserByEmail(email string) (*daos.User, error) {
 	var user daos.User
 	err := database.DB.Where("email = ?", email).First(&user).Error
 	if err != nil {
