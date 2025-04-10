@@ -5,6 +5,7 @@ type UserDto struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
+	Job       string `json:"job"`
 }
 
 type UserDtoResponse struct {

@@ -24,11 +24,13 @@ func init() {
 	JWT_SECRET = []byte(os.Getenv("SECRET_KEY"))
 }
 
-func GenereateToken(email string) (string, error) {
+func GenereateToken(lastname string, email string, job string) (string, error) {
 	expirationTime := time.Now().Add(72 * time.Hour)
 
 	claims := &models.Claims{
-		Email: email,
+		LastName: lastname,
+		Email:    email,
+		Job:      job,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

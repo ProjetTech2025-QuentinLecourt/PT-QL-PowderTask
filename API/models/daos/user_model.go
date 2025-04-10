@@ -6,4 +6,5 @@ type User struct {
 	LastName  string `json:"last_name" gorm:"type:varchar(50);not null"`
 	Email     string `json:"email" gorm:"type:varchar(100);unique;not null"`
 	Password  string `json:"password" gorm:"type:varchar(100);not null"`
+	Job       string `json:"job" gorm:"type:ENUM('CE','OP','P') default:'OP'"`
 }

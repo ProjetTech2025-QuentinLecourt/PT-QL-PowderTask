@@ -29,7 +29,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	bearerToken, err := services.GenereateToken(userDtoLogin.Email)
+	// Get l'utilisateur ici
+
+	bearerToken, err := services.GenereateToken("Test", userDtoLogin.Email, "CE")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de générer le token"})
 		return
