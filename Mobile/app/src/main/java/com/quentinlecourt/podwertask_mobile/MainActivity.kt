@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
+import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import kotlinx.coroutines.Dispatchers
@@ -15,13 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private val apiService: MyAPI by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MyAPI::class.java)
-    }
+    private val apiService: MyAPI by lazy { RetrofitInstance.apiService }
 
     private lateinit var mqttClient: MqttClient
     private val brokerUrl = "ssl://mqtt.powdertask.quentinlecourt.com:8883"

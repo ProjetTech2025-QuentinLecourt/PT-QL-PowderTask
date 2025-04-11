@@ -49,5 +49,5 @@ void setup()
 void loop()
 {
   powderScaleController->loop();
-  delay(1000);
+  delay(100);
 }

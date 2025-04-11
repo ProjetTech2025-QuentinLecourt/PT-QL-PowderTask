@@ -73,8 +73,9 @@ float Scale::get_units_g(int times){
 }
 
 float Scale::get_units_kg(int times){
+    if (times < 1) times = 1;
     read();
     float value = scaleHX711->get_units(times);
     value = value / 1000;
-    return value;
+    return value < 0 ? 0 : value;
 }

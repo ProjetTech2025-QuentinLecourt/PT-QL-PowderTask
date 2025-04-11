@@ -11,6 +11,9 @@
 #include "Structs.h"
 #include "Enums.cpp"
 #include <EEPROM.h>
+#include <Wire.h>
+#include <MPU9250_asukiaaa.h>
+#include <ArduinoJson.h>
 
 #define EEPROM_SIZE 512  // Taille max ESP32 (4 Ko possible)
 
@@ -28,6 +31,13 @@ enum INSTALL_STATE {
     NOT_INSTALL,
     INSTALL
 };
+
+#define SDA_PIN 15
+#define SCL_PIN 04
+#define MOVEMENT_THRESHOLD 0.2 // Seuil de mouvement en g
+#define ACCEL_NORM_STABLE 1.0  // Valeur attendue de la norme au repos (~1g)
+
+#define WEIGHT_THRESHOLD 0.01 
 
 
 
@@ -47,6 +57,20 @@ private:
     char *ssid;
     char *password;
 
+    // Accelerometre
+    bool isAccInitialized = false;
+    float lastAccelX = 0;
+    float lastAccelY = 0;
+    float lastAccelZ = 0;
+    float movementThreshold;
+    unsigned long lastCheckTime;
+
+    float lastSentWeight = 0;
+
+    // Variables d'état qui seront retourner au broker toutes les 5 minutes
+    bool accelerometerFunctional;
+    bool weightSensorFunctionnal;
+
     // MQTT
     const char *mqtt_server;
     int mqtt_port = 8883;
@@ -57,6 +81,7 @@ private:
     MyStone *myStone = nullptr;
     WiFiClientSecure *wifiClient = nullptr;
     PubSubClient *mqttClient = nullptr;
+    MPU9250_asukiaaa *accelerometer = nullptr;
 
     void initEEPROM(bool forced);
     bool isStringValid(const String &str);
@@ -66,9 +91,19 @@ private:
     uint8_t readEnum(int offset);
     void clearEEPROM();
 
+    void displayModal(const char* title, const char* desc1, const char* desc2);
+
+    void handleCommand(const char* topic, byte* payload, unsigned int length);
+    void publishStatus(const char* scaleId);
+
 public:
     PowderScaleController(controllerInit init);
     ~PowderScaleController();
+
+    bool beginAccelerometer();
+    bool isMoving();
+    void printAccelerometerData(); // Affichage des données (débogage)
+
     bool init();
     void connectToWiFi();
     void connectToMqtt();

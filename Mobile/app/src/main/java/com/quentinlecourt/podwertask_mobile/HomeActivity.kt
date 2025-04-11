@@ -32,27 +32,27 @@ class HomeActivity: AppCompatActivity() {
 
         val token = sessionManager.fetchAuthToken()
         val claims = token?.decodeJwt()
-        val userLastName = claims?.get("lastname")
+        val userFirstname = claims?.get("firstname")
         println(claims)
         val userJob = claims?.get("job")
 
-        if (userLastName != null) {
+        if (userFirstname != null) {
             if (userJob != null) {
                 when {
-                    userJob.isEmpty()  || userLastName.isEmpty() -> {
+                    userJob.isEmpty()  || userFirstname.isEmpty() -> {
                         tv_h_welcome.text = "Impossible de récupérer le job de l'utilisateur"
                         background.setBackgroundResource(R.color.white)
                     }
 
                     userJob == "CE" -> {
                         tv_h_welcome.text = getString(R.string.welcome_admin)
-                        tv_h_username.text = userLastName
+                        tv_h_username.text = userFirstname
                         background.setBackgroundResource(R.drawable.admin_background)
                     }
 
                     userJob == "P" || userJob == "OP" -> {
                         tv_h_welcome.text = getString(R.string.welcome_user)
-                        tv_h_username.text = userLastName
+                        tv_h_username.text = userFirstname
                         background.setBackgroundResource(R.drawable.user_background)
                     }
 

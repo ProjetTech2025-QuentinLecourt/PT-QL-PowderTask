@@ -25,6 +25,7 @@ PowderScaleController::PowderScaleController(controllerInit init)
     myStone = new MyStone(stoneSpeed, SERIAL_8N1, rxGpio, txGpio);
     wifiClient = new WiFiClientSecure();
     mqttClient = new PubSubClient(*wifiClient);
+    accelerometer = new MPU9250_asukiaaa();
 }
 
 PowderScaleController::~PowderScaleController()
@@ -158,27 +159,27 @@ bool PowderScaleController::init()
     // Verification de la communication avec le HX711
     if (scaleClass == nullptr)
     {
-        myStone->setView("pup_alerte");
-        myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'instanciation");
-        myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'instancier la classe de la balance !");
-        // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
+        displayModal("Erreur d'instanciation", "Impossible d'instancier la classe de la balance !", "");
         return false;
     }
     if (!scaleClass->init(400, 100))
     {
-        myStone->setView("pup_alerte");
-        myStone->setTextLabel("lbl_title_alert_pup", "Erreur d'initialisation");
-        myStone->setTextLabel("lbl_description_alert_pup", "Impossible d'intialiser la balance !");
-        // myStone->setTextLabel("lbl_description2_alert_pup", "Erreur !");
+        displayModal("Erreur d'initialisation", "Impossible d'intialiser la balance !", "");
         return false;
     }
     // Suppression de la classe Scale suite à la verification
     // delete scaleClass;
     // scaleClass = nullptr;
 
+    if (!beginAccelerometer())
+    {
+        displayModal("Erreur d'initialisation", "L'accelerometre ne repond pas !", "Impossible de s'en servir");
+        return false;
+    }
+
     EEPROM.begin(EEPROM_SIZE);
     (readEnum(INSTALLATION_OFFSET) == NOT_INSTALL) ? initEEPROM(true) : initEEPROM(false);
-    
+
     // Se connecter au Wi-Fi
     connectToWiFi();
 
@@ -197,6 +198,7 @@ bool PowderScaleController::init()
     delay(10);
     myStone->setView("w_dashbord");
     myStone->setView("overlay_layout");
+    displayModal("Installation correct", "Tous les modules et composants sont operationnels.", "Il est temps de peser!");
     return true;
 }
 
@@ -228,6 +230,10 @@ void PowderScaleController::connectToMqtt()
         if (mqttClient->connect("ESP32Client", mqtt_user, mqtt_password))
         {
             Serial.println("Connected to MQTT");
+            mqttClient->setCallback([this](char *topic, byte *payload, unsigned int length)
+                                    { handleCommand(topic, payload, length); });
+            mqttClient->subscribe("/scale/1/status");
+            mqttClient->subscribe("/scale/1/commands");
             mqttClient->subscribe("test");
             mqttClient->publish("test", "Nouvelle connexion");
         }
@@ -255,13 +261,21 @@ void PowderScaleController::onMqttMessage(char *topic, uint8_t *payload, unsigne
 void PowderScaleController::lookingForDatas()
 {
     datasRead dr = myStone->getValidsDatasIfExists();
-    Serial.println("Data:");
-    Serial.println(dr.data);
+    if (dr.data[0] != '\0')
+    {
+        Serial.println("Data:");
+        Serial.println(dr.data);
+    }
 };
 
 void PowderScaleController::loop()
 {
     lookingForDatas();
+    // printAccelerometerData();
+    if (isMoving())
+    {
+        displayModal("Avertissement", "Pour une meilleure precision et ne rien briser", "Il est recommande de ne pas deplacer la balance lors de son usage.");
+    }
 
     if (!mqttClient->connected())
     {
@@ -270,20 +284,170 @@ void PowderScaleController::loop()
     mqttClient->loop();
 
     if (scaleClass->is_ready())
-    { // Lire la valeur brute de l'ADC
-        Serial.println("Lecture de la balance...");
-        float weight = scaleClass->get_units_kg(20);
-
-        Serial.print("Poids : ");
-        Serial.print(weight);
-        Serial.println(" Kg");
-        myStone->setTextLabel("lbl_weight", floatToChar(weight));
-        mqttClient->publish("test", floatToChar(weight));
-        Serial.print("Valeur brute : ");
-        Serial.println(scaleClass->get_units_g(1));
-    }
-    else
     {
-        Serial.println("Erreur : Impossible de lire les données du HX711 !");
+        float weight = scaleClass->get_units_kg(20);
+        if (weight < 0)
+        {
+            weight = 0;
+        }
+
+        if (abs(weight - lastSentWeight) > WEIGHT_THRESHOLD)
+        {
+            myStone->setTextLabel("lbl_weight", floatToChar(weight));
+            mqttClient->publish("test", floatToChar(weight));
+            lastSentWeight = weight;
+        }
     }
+}
+
+void PowderScaleController::displayModal(const char *title, const char *desc1, const char *desc2)
+{
+    myStone->setView("pup_alerte");
+    myStone->setTextLabel("lbl_title_alert_pup", title);
+    myStone->setTextLabel("lbl_description_alert_pup", desc1);
+    myStone->setTextLabel("lbl_description2_alert_pup", desc2);
+}
+
+bool PowderScaleController::beginAccelerometer()
+{
+
+    if (accelerometer == nullptr)
+    {
+        Serial.println("ERREUR: Pointeur accelerometer non initialisé!");
+        accelerometerFunctional = false;
+        return false;
+    }
+
+    Wire.begin(SDA_PIN, SCL_PIN);
+    accelerometer->setWire(&Wire);
+    accelerometer->beginAccel();
+    if (accelerometer->accelUpdate() != 0)
+    {
+        Serial.println("Échec de la lecture initiale de l'accéléromètre");
+        accelerometerFunctional = false;
+        return false;
+    }
+
+    accelerometerFunctional = true;
+    return true;
+}
+
+bool PowderScaleController::isMoving()
+{
+    if (!accelerometerFunctional)
+    {
+        Serial.println("Avertissement: Accéléromètre non fonctionnel");
+        return false;
+    }
+
+    if (accelerometer->accelUpdate() != 0)
+    {
+        Serial.println("Erreur de lecture");
+        accelerometerFunctional = false;
+        return false;
+    }
+
+    float currentX = accelerometer->accelX();
+    float currentY = accelerometer->accelY();
+    float currentZ = accelerometer->accelZ();
+    float currentNorm = sqrt(currentX * currentX + currentY * currentY + currentZ * currentZ);
+
+    if (abs(currentNorm - ACCEL_NORM_STABLE) > 0.5f)
+    { // Seuil élargi
+        Serial.println("Données aberrantes");
+        accelerometerFunctional = false;
+        return false;
+    }
+    if (!isAccInitialized)
+    {
+        lastAccelX = currentX;
+        lastAccelY = currentY;
+        lastAccelZ = currentZ;
+        isAccInitialized = true;
+    }
+    float deltaX = abs(currentX - lastAccelX);
+    float deltaY = abs(currentY - lastAccelY);
+    float deltaZ = abs(currentZ - lastAccelZ);
+
+    lastAccelX = currentX;
+    lastAccelY = currentY;
+    lastAccelZ = currentZ;
+
+    bool isMoving = (deltaX > MOVEMENT_THRESHOLD) ||
+                    (deltaY > MOVEMENT_THRESHOLD) ||
+                    (deltaZ > MOVEMENT_THRESHOLD);
+
+    // Debug (à commenter en production)
+    // Serial.printf("Deltas: X=%.3f Y=%.3f Z=%.3f\n", deltaX, deltaY, deltaZ);
+    // Serial.printf("Seuil: %.3f | Moving: %d\n", MOVEMENT_THRESHOLD, isMoving);
+
+    return isMoving;
+}
+
+void PowderScaleController::printAccelerometerData()
+{
+    if (accelerometer->accelUpdate() == 0)
+    {
+        Serial.print("X: ");
+        Serial.print(accelerometer->accelX());
+        Serial.print(" Y: ");
+        Serial.print(accelerometer->accelY());
+        Serial.print(" Z: ");
+        Serial.print(accelerometer->accelZ());
+        Serial.print(" Norm: ");
+        Serial.println(sqrt(pow(accelerometer->accelX(), 2) +
+                            pow(accelerometer->accelY(), 2) +
+                            pow(accelerometer->accelZ(), 2)));
+    }
+}
+
+void PowderScaleController::handleCommand(const char *topic, byte *payload, unsigned int length)
+{
+    String message;
+    for (unsigned int i = 0; i < length; i++)
+    {
+        message += (char)payload[i];
+    }
+
+    DynamicJsonDocument doc(256);
+    DeserializationError error = deserializeJson(doc, message);
+
+    if (error)
+    {
+        Serial.print("Erreur JSON: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    if (doc["command"] == "get_status")
+    {
+
+        String fullTopic = String(topic);
+        int idStart = fullTopic.indexOf("/scale/") + 7;
+        int idEnd = fullTopic.indexOf("/commands");
+        String scaleId = fullTopic.substring(idStart, idEnd);
+
+        publishStatus(scaleId.c_str());
+    }
+}
+
+void PowderScaleController::publishStatus(const char *scaleId)
+{
+    DynamicJsonDocument doc(256);
+
+    // Ajouter les données au JSON
+    doc["accelerometer"] = accelerometerFunctional;
+    doc["weightSensor"] = scaleClass->is_ready();
+    doc["timestamp"] = millis();
+
+    // Sérialiser le JSON
+    char jsonBuffer[256];
+    serializeJson(doc, jsonBuffer);
+
+    // Construire le topic de réponse
+    char statusTopic[50];
+    snprintf(statusTopic, sizeof(statusTopic), "/scale/%s/status", scaleId);
+
+    // Publier le message
+    mqttClient->publish(statusTopic, jsonBuffer);
 }

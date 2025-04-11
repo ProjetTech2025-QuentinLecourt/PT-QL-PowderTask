@@ -5,24 +5,21 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.quentinlecourt.podwertask_mobile.data.adapter.MachineAdapter
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
+import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
 import com.quentinlecourt.podwertask_mobile.data.services.MqttManager
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DevicesListActivity : AppCompatActivity() {
 
-    private val apiService: MyAPI by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MyAPI::class.java)
-    }
+    private val apiService: MyAPI by lazy { RetrofitInstance.apiService }
 
     private lateinit var machineAdapter: MachineAdapter
     private var machines = mutableListOf<Machine>()
@@ -111,20 +108,62 @@ class DevicesListActivity : AppCompatActivity() {
     }
 
     private fun loadMachines() {
-        // Exemple de données
-        machines.clear()
-        machines.addAll(listOf(
-            Machine(1, "Machine Id1", false, null, null, System.currentTimeMillis() - 3600000)
-//            Machine(2, "Machine B", false, false, true, System.currentTimeMillis() - 7200000),
-//            Machine(3, "Machine C", false, true, true, System.currentTimeMillis() - 1800000),
-//            Machine(4, "Machine A", true, null, null, System.currentTimeMillis() - 3600000),
-//            Machine(5, "Machine B", false, false, true, System.currentTimeMillis() - 7200000),
-//            Machine(6, "Machine C", true, null, null, System.currentTimeMillis() - 1800000)
-        ))
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getMachines()
+                if (response.isSuccessful) {
+                    val scaleResponse = response.body()
 
-        // Initialiser la liste filtrée avec toutes les machines
-        filteredMachines.clear()
-        filteredMachines.addAll(machines)
+                    if (scaleResponse?.data?.scales != null) {  // Vérification null explicite
+                        // Convertir les ScaleDto en Machine
+                        val newMachines = scaleResponse.data.scales.mapNotNull { scaleDto ->
+                            Machine(
+                                id = scaleDto.id,
+                                name = scaleDto.scale_name,
+                                isOnline = false,
+                                isSensorAccelerometerCorrect = null,
+                                isSensorWeightCorrect = null,
+                                lastConnectionTime = System.currentTimeMillis()
+                            )
+                        }
+
+                        // Mettre à jour sur le thread UI
+                        withContext(Dispatchers.Main) {
+                            machines.clear()
+                            machines.addAll(newMachines)
+                            filteredMachines.clear()
+                            filteredMachines.addAll(machines)
+                            sortMachines()
+                            subscribeToAllMachines()
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(
+                                this@DevicesListActivity,
+                                "Aucune machine disponible",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@DevicesListActivity,
+                            "Erreur serveur: ${response.code()}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@DevicesListActivity,
+                        "Erreur: ${e.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
     }
 
     private fun sortMachines() {

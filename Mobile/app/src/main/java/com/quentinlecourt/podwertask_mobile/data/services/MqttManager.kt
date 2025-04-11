@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import com.quentinlecourt.podwertask_mobile.BuildConfig
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
+import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,13 +17,7 @@ import java.util.UUID
 
 class MqttManager(private val context: Context) {
 
-    private val apiService: MyAPI by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MyAPI::class.java)
-    }
+    private val apiService: MyAPI by lazy { RetrofitInstance.apiService }
 
     private val TAG = "MqttManager"
     private var mqttClient: MqttClient? = null
@@ -120,10 +115,10 @@ class MqttManager(private val context: Context) {
             val sensors = mutableMapOf<String, Boolean>()
 
             // extraction d'états de capteurs
-            if (statusJson.contains("\"accelerometer\": true")) sensors["accelerometer"] = true
-            if (statusJson.contains("\"accelerometer\": false")) sensors["accelerometer"] = false
-            if (statusJson.contains("\"weightSensor\": true")) sensors["weightSensor"] = true
-            if (statusJson.contains("\"weightSensor\": false")) sensors["weightSensor"] = false
+            if (statusJson.contains("\"accelerometer\":true")) sensors["accelerometer"] = true
+            if (statusJson.contains("\"accelerometer\":false")) sensors["accelerometer"] = false
+            if (statusJson.contains("\"weightSensor\":true")) sensors["weightSensor"] = true
+            if (statusJson.contains("\"weightSensor\":false")) sensors["weightSensor"] = false
 
             // Notifier le callback avec l'ID et les données
             statusCallback?.invoke(machineId, isOnline, sensors)

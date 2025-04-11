@@ -10,19 +10,13 @@ import androidx.lifecycle.lifecycleScope
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
 import com.quentinlecourt.podwertask_mobile.data.model.LoginRequest
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
+import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
-    private val apiService: MyAPI by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MyAPI::class.java)
-    }
+    private val apiService: MyAPI by lazy { RetrofitInstance.apiService }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
