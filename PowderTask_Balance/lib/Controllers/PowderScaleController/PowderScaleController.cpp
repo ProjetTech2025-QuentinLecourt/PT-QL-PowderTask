@@ -285,6 +285,7 @@ void PowderScaleController::loop()
 
     if (scaleClass->is_ready())
     {
+        if (!weightSensorFunctionnal) weightSensorFunctionnal = true;
         float weight = scaleClass->get_units_kg(20);
         if (weight < 0)
         {
@@ -298,6 +299,13 @@ void PowderScaleController::loop()
             lastSentWeight = weight;
         }
     }
+    else
+    {
+        displayModal("Erreur capteur de poids", "Les capteurs de poids ne répondent pas.", "Impossible de récupérer la masse.");
+        weightSensorFunctionnal = false;
+    }
+    
+    publishStatus(false);
 }
 
 void PowderScaleController::displayModal(const char *title, const char *desc1, const char *desc2)
@@ -314,8 +322,9 @@ bool PowderScaleController::beginAccelerometer()
     if (accelerometer == nullptr)
     {
         Serial.println("ERREUR: Pointeur accelerometer non initialisé!");
+        accelerometerInit = false;
         accelerometerFunctional = false;
-        return false;
+        return accelerometerInit;
     }
 
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -324,20 +333,26 @@ bool PowderScaleController::beginAccelerometer()
     if (accelerometer->accelUpdate() != 0)
     {
         Serial.println("Échec de la lecture initiale de l'accéléromètre");
+        accelerometerInit = false;
         accelerometerFunctional = false;
-        return false;
+        return accelerometerInit;
     }
 
+    accelerometerInit = true;
     accelerometerFunctional = true;
-    return true;
+    return accelerometerInit;
 }
 
 bool PowderScaleController::isMoving()
 {
-    if (!accelerometerFunctional)
+    if (!accelerometerInit)
     {
-        Serial.println("Avertissement: Accéléromètre non fonctionnel");
-        return false;
+        if (!beginAccelerometer())
+        {
+            Serial.println("Avertissement: Accéléromètre non fonctionnel");
+            return false;
+        }
+        
     }
 
     if (accelerometer->accelUpdate() != 0)
@@ -381,6 +396,7 @@ bool PowderScaleController::isMoving()
     // Serial.printf("Deltas: X=%.3f Y=%.3f Z=%.3f\n", deltaX, deltaY, deltaZ);
     // Serial.printf("Seuil: %.3f | Moving: %d\n", MOVEMENT_THRESHOLD, isMoving);
 
+    accelerometerFunctional = true;
     return isMoving;
 }
 
@@ -422,32 +438,37 @@ void PowderScaleController::handleCommand(const char *topic, byte *payload, unsi
     if (doc["command"] == "get_status")
     {
 
-        String fullTopic = String(topic);
-        int idStart = fullTopic.indexOf("/scale/") + 7;
-        int idEnd = fullTopic.indexOf("/commands");
-        String scaleId = fullTopic.substring(idStart, idEnd);
+        // String fullTopic = String(topic);
+        // int idStart = fullTopic.indexOf("/scale/") + 7;
+        // int idEnd = fullTopic.indexOf("/commands");
+        // String scaleId = fullTopic.substring(idStart, idEnd);
 
-        publishStatus(scaleId.c_str());
+        publishStatus(true);
     }
 }
 
-void PowderScaleController::publishStatus(const char *scaleId)
+void PowderScaleController::publishStatus(bool forced = false)
 {
-    DynamicJsonDocument doc(256);
+    if ((lastAccelerometerFunctional != accelerometerFunctional) || (lastWeightSensorFunctionnal != weightSensorFunctionnal) || forced)
+    {
+        lastAccelerometerFunctional = accelerometerFunctional;
+        lastWeightSensorFunctionnal = weightSensorFunctionnal;
+        DynamicJsonDocument doc(256);
 
-    // Ajouter les données au JSON
-    doc["accelerometer"] = accelerometerFunctional;
-    doc["weightSensor"] = scaleClass->is_ready();
-    doc["timestamp"] = millis();
+        // Ajouter les données au JSON
+        doc["accelerometer"] = lastAccelerometerFunctional;
+        doc["weightSensor"] = lastWeightSensorFunctionnal;
+        doc["timestamp"] = millis();
 
-    // Sérialiser le JSON
-    char jsonBuffer[256];
-    serializeJson(doc, jsonBuffer);
+        // Sérialiser le JSON
+        char jsonBuffer[256];
+        serializeJson(doc, jsonBuffer);
 
-    // Construire le topic de réponse
-    char statusTopic[50];
-    snprintf(statusTopic, sizeof(statusTopic), "/scale/%s/status", scaleId);
+        // Construire le topic de réponse
+        char statusTopic[50];
+        snprintf(statusTopic, sizeof(statusTopic), "/scale/%s/status", scaleId);
 
-    // Publier le message
-    mqttClient->publish(statusTopic, jsonBuffer);
+        // Publier le message
+        mqttClient->publish(statusTopic, jsonBuffer);
+    }
 }

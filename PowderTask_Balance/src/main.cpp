@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "PowderScaleController.h"
-#include "Structs.h"
+#include "../lib/Controllers/PowderScaleController/PowderScaleController.h"
+#include "../lib/Core/EnumsAndStrcuts/Structs.h"
 
 #define ESP_SPEED 9600
 

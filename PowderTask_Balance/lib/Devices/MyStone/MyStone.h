@@ -12,8 +12,8 @@
 #define MYSTONE_H
 
 #include <string>
-#include "MySerial.h"
-#include "Structs.h"
+#include "../MySerial/MySerial.h"
+#include "../../Core/EnumsAndStrcuts/Structs.h"
 
 class MyStone
 {

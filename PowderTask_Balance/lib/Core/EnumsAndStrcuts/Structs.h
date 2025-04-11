@@ -1,4 +1,3 @@
-
 #ifndef STRUCTS_H
 #define STRUCTS_H
 // Structure local utilisés pour garder les informations lues de l'écran

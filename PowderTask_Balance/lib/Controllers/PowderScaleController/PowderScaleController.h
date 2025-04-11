@@ -5,11 +5,11 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-#include "Scale.h"
-#include "MyStone.h"
-#include "Convertor.h"
-#include "Structs.h"
-#include "Enums.cpp"
+#include "../../Devices/Scale/Scale.h"
+#include "../../Devices/MyStone/MyStone.h"
+#include "../../Core/Useful/Convertor.h"
+#include "../../Core/EnumsAndStrcuts/Structs.h"
+#include "../../Core/EnumsAndStrcuts/Enums.h"
 #include <EEPROM.h>
 #include <Wire.h>
 #include <MPU9250_asukiaaa.h>
@@ -67,9 +67,14 @@ private:
 
     float lastSentWeight = 0;
 
-    // Variables d'état qui seront retourner au broker toutes les 5 minutes
-    bool accelerometerFunctional;
-    bool weightSensorFunctionnal;
+    const char* scaleId = "1";
+
+    // Variables d'état 
+    bool accelerometerInit = false;
+    bool accelerometerFunctional = false;
+    bool weightSensorFunctionnal = false;
+    bool lastAccelerometerFunctional = accelerometerFunctional;
+    bool lastWeightSensorFunctionnal = weightSensorFunctionnal;
 
     // MQTT
     const char *mqtt_server;
@@ -94,7 +99,7 @@ private:
     void displayModal(const char* title, const char* desc1, const char* desc2);
 
     void handleCommand(const char* topic, byte* payload, unsigned int length);
-    void publishStatus(const char* scaleId);
+    void publishStatus(bool forced);
 
 public:
     PowderScaleController(controllerInit init);
