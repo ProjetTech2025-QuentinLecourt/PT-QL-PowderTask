@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--   Inferieur Gauche     -->
+    <!--   Superieur Droit     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
@@ -8,11 +8,11 @@
                 android:gradientRadius="300dp"
                 android:centerX="-20%"
                 android:centerY="120%"
-                android:startColor="@color/orange_bg"
+                android:startColor="@color/bleu_background"
                 android:endColor="#FFFFFF" />
         </shape>
     </item>
-    <!--   Supérieur gauche     -->
+    <!--   Superieur Gauche     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
@@ -20,11 +20,11 @@
                 android:gradientRadius="300dp"
                 android:centerX="-20%"
                 android:centerY="-20%"
-                android:startColor="@color/orange_bg"
+                android:startColor="@color/bleu_background"
                 android:endColor="#00FFFFFF" />
         </shape>
     </item>
-    <!--   Supérieur droit     -->
+    <!--   Inferieur Gauche     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
@@ -32,7 +32,7 @@
                 android:gradientRadius="300dp"
                 android:centerX="120%"
                 android:centerY="-20%"
-                android:startColor="@color/orange_bg"
+                android:startColor="@color/bleu_background"
                 android:endColor="#00FFFFFF" />
         </shape>
     </item>
@@ -44,7 +44,7 @@
                 android:gradientRadius="300dp"
                 android:centerX="120%"
                 android:centerY="120%"
-                android:startColor="@color/orange_bg"
+                android:startColor="@color/bleu_background"
                 android:endColor="#00FFFFFF" />
         </shape>
     </item>

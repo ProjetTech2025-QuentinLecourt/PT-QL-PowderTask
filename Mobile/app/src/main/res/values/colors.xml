@@ -5,13 +5,15 @@
     <color name="white">#FFFFFFFF</color>
 
     <!--  Blue Management   -->
-    <color name="bleu_gestion_t">#3E5AA4FF</color>
-    <color name="bleu_gestion">#AE65BEFF</color>
+    <color name="bleu_gestion_t">#9C6EB4B9</color>
+    <color name="bleu_gestion">#76979C</color>
     <color name="bleu_gestion_visible">#AE1F6098</color>
 
     <!--  Theme Colors  -->
-    <color name="orange_chalereux">#FF9A5A</color>
-    <color name="mauve_constraste">#FF95BA</color>
+    <color name="orange_chalereux">#ca674e</color>
+    <color name="orange_light">#fce3b1</color>
+    <color name="orange_bg">#EFBC92</color>
+    <color name="bleu_background">#aebfcc</color>
     <color name="mauve_raisin">#C084FB</color>
     <color name="vert_menthe">#5AFFA4</color>
     <color name="rouge_cerise_mur">#D1003B</color>

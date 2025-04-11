@@ -53,7 +53,7 @@ class HomeActivity: AppCompatActivity() {
                     userJob == "P" || userJob == "OP" -> {
                         tv_h_welcome.text = getString(R.string.welcome_user)
                         tv_h_username.text = userFirstname
-                        background.setBackgroundResource(R.drawable.user_background)
+                        background.setBackgroundResource(R.drawable.background)
                     }
 
                     else -> {
