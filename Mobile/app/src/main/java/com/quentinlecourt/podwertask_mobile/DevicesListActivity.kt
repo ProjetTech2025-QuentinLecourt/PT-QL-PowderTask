@@ -1,10 +1,12 @@
 package com.quentinlecourt.podwertask_mobile
 
 import android.os.Bundle
+import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +25,13 @@ class DevicesListActivity : AppCompatActivity() {
 
     private lateinit var machineAdapter: MachineAdapter
     private var machines = mutableListOf<Machine>()
-    private var sortByName = true // true pour tri alphabétique, false pour tri par dernière connexion
+
+    private enum class SortMode {
+        A_TO_Z, Z_TO_A, LAST_CONNECTION, FIRST_CONNECTION
+    }
+
+    private var currentSortMode = SortMode.A_TO_Z
+
     private lateinit var mqttManager: MqttManager
 
     // Map pour suivre les machines filtrées actuellement affichées
@@ -61,9 +69,8 @@ class DevicesListActivity : AppCompatActivity() {
         recyclerView.adapter = machineAdapter
 
         // Configurer le bouton de tri
-        findViewById<ImageButton>(R.id.filterImage).setOnClickListener {
-            sortByName = !sortByName
-            sortMachines()
+        findViewById<ImageButton>(R.id.filterImage).setOnClickListener { view ->
+            showSortPopupMenu(view)
         }
 
         // Configurer les checkboxes de filtrage
@@ -93,9 +100,8 @@ class DevicesListActivity : AppCompatActivity() {
                     it.isSensorWeightCorrect = sensors["weightSensor"]!!
                 }
 
-                // Mettre à jour l'interface utilisateur
                 runOnUiThread {
-                    filterMachines() // Ré-appliquer les filtres et mettre à jour la liste
+                    filterMachines()
                 }
             }
         }
@@ -166,40 +172,77 @@ class DevicesListActivity : AppCompatActivity() {
         }
     }
 
-    private fun sortMachines() {
-        if (sortByName) {
-            filteredMachines.sortBy { it.name }
-        } else {
-            filteredMachines.sortByDescending { it.lastConnectionTime }
+    private fun showSortPopupMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor) // Utiliser 'this' si dans une Activity
+        popup.menuInflater.inflate(R.menu.scale_sort_menu, popup.menu)
+
+        when(currentSortMode) {
+            SortMode.A_TO_Z -> popup.menu.findItem(R.id.sort_az).isChecked = true
+            SortMode.Z_TO_A -> popup.menu.findItem(R.id.sort_za).isChecked = true
+            SortMode.LAST_CONNECTION -> popup.menu.findItem(R.id.sort_last_connection).isChecked = true
+            SortMode.FIRST_CONNECTION -> popup.menu.findItem(R.id.sort_first_connection).isChecked = true
         }
-        machineAdapter.notifyDataSetChanged()
+
+        popup.setOnMenuItemClickListener { item ->
+            when(item.itemId) {
+                R.id.sort_az -> {
+                    currentSortMode = SortMode.A_TO_Z
+                    true
+                }
+                R.id.sort_za -> {
+                    currentSortMode = SortMode.Z_TO_A
+                    true
+                }
+                R.id.sort_last_connection -> {
+                    currentSortMode = SortMode.LAST_CONNECTION
+                    true
+                }
+                R.id.sort_first_connection -> {
+                    currentSortMode = SortMode.FIRST_CONNECTION
+                    true
+                }
+                else -> false
+            }.also { if (it) sortMachines() }
+        }
+
+        popup.show()
     }
 
     private fun filterMachines() {
         val showOnline = findViewById<CheckBox>(R.id.checkBox_onlineDevice).isChecked
         val showProblem = findViewById<CheckBox>(R.id.checkBox_problemDevice).isChecked
 
-        // Filtrer les machines selon les critères
         filteredMachines.clear()
         filteredMachines.addAll(machines.filter { machine ->
             val matchesOnlineFilter = !showOnline || machine.isOnline
-            val matchesProblemFilter = !showProblem || machine.isSensorAccelerometerCorrect == false || machine.isSensorWeightCorrect == false
+            val matchesProblemFilter = !showProblem ||
+                    machine.isSensorAccelerometerCorrect == false ||
+                    machine.isSensorWeightCorrect == false
             matchesOnlineFilter && matchesProblemFilter
         })
 
-        // Appliquer le tri actuel
-        if (sortByName) {
-            filteredMachines.sortBy { it.name }
-        } else {
-            filteredMachines.sortByDescending { it.lastConnectionTime }
-        }
+        applySorting()
+
+        machineAdapter.notifyDataSetChanged()
+    }
+
+    private fun applySorting() {
+        filteredMachines.sortWith(when(currentSortMode) {
+            SortMode.A_TO_Z -> compareBy { it.name }
+            SortMode.Z_TO_A -> compareByDescending { it.name }
+            SortMode.LAST_CONNECTION -> compareByDescending { it.lastConnectionTime }
+            SortMode.FIRST_CONNECTION -> compareBy { it.lastConnectionTime }
+        })
+    }
+
+    private fun sortMachines() {
+        applySorting()
 
         machineAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Déconnecter proprement le client MQTT
         mqttManager.disconnect()
     }
 }

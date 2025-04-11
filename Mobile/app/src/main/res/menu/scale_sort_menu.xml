@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_az"
+        android:title="A → Z"/>
+    <item
+        android:id="@+id/sort_za"
+        android:title="Z → A"/>
+    <item
+        android:id="@+id/sort_last_connection"
+        android:title="Dernière connexion"/>
+    <item
+        android:id="@+id/sort_first_connection"
+        android:title="Première connexion"/>
+</menu>

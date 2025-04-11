@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.quentinlecourt.podwertask_mobile.R
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
@@ -21,7 +20,7 @@ class MachineAdapter(private val machines: List<Machine>) : RecyclerView.Adapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MachineViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
-            R.layout.card_view,
+            R.layout.scale_card_view,
             parent,
             false
         )
