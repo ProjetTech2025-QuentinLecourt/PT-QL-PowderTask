@@ -56,10 +56,8 @@ class DevicesListActivity : AppCompatActivity() {
             }
         }
 
-        // Configurer le callback de statut MQTT
         setupMqttStatusCallback()
 
-        // Initialiser les données
         loadMachines()
 
         // Configurer la RecyclerView
