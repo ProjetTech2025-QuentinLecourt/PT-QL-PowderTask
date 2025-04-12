@@ -21,6 +21,7 @@ android {
 
         // URL vers l'API
         buildConfigField("String", "API_BASE_URL", "\"https://my-gin-api.quentinlecourt.com/\"")
+        buildConfigField("String", "MQTT_BASE_URL", "\"ssl://mqtt.powdertask.quentinlecourt.com:8883\"")
     }
 
     buildTypes {

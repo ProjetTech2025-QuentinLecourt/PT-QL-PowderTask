@@ -21,7 +21,7 @@ class MqttManager(private val context: Context) {
 
     private val TAG = "MqttManager"
     private var mqttClient: MqttClient? = null
-    private val brokerUrl = "ssl://mqtt.powdertask.quentinlecourt.com:8883"
+    private val brokerUrl = BuildConfig.MQTT_BASE_URL
     private val clientId = "PowderScaleMobile_" + UUID.randomUUID().toString()
 
     private val subscriptions = mutableMapOf<Int, String>() // Map des IDs de machines aux topics souscrits
