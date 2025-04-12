@@ -68,6 +68,11 @@ class DevicesListActivity : AppCompatActivity() {
         machineAdapter = MachineAdapter(filteredMachines)
         recyclerView.adapter = machineAdapter
 
+        // Bouton de retour (ferme simplement l'activité)
+        findViewById<ImageButton>(R.id.return_from_devicesListPage).setOnClickListener{
+            finish()
+        }
+
         // Configurer le bouton de tri
         findViewById<ImageButton>(R.id.filterImage).setOnClickListener { view ->
             showSortPopupMenu(view)

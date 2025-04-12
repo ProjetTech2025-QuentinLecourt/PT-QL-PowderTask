@@ -78,7 +78,6 @@ class HomeActivity: AppCompatActivity() {
     private fun navigateToDevicesList() {
         val intent = Intent(this, DevicesListActivity::class.java)
         startActivity(intent)
-        finish()
     }
 
     private fun String.decodeJwt(): Map<String, String>? {
