@@ -27,4 +27,27 @@
     <string name="status_fonctional">Fonctionnel</string>
     <string name="status_problem">Défaillant</string>
     <string name="status_unknow">\?</string>
+
+    <!--  Materials Status  -->
+
+    <string name="stable">Stable</string>
+    <string name="on_move">En mouvement</string>
+    <string name="unusable">Inutilisable</string>
+    <string name="problem">Défaut</string>
+    <string name="unavailable">Indisponible</string>
+    <string name="incoherent">Incohérent</string>
+
+    <string name="global_status">Status global :</string>
+    <string name="accelerometer_status">Accéléromètre :</string>
+    <string name="accelerometerX_status">X :</string>
+    <string name="accelerometerY_status">Y :</string>
+    <string name="accelerometerZ_status">Z :</string>
+    <string name="accelerometerNorm_status">Norm :</string>
+    <string name="weightSensor_status">Capteurs de poids :</string>
+    <string name="calibration_index">Indice de calibrage :</string>
+    <string name="detected_weight">Poids détécté :</string>
+    <string name="stoneDisplay_status">Ecran interactif :</string>
+
+    <string name="associated_user_list">Liste des personnes associées:</string>
+
 </resources>

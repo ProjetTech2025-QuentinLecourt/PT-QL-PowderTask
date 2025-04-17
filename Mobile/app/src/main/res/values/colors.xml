@@ -3,6 +3,7 @@
     <!--  Basics  -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="dark_grey">#212121</color>
 
     <!--  Blue Management   -->
     <color name="bleu_gestion_t">#9C6EB4B9</color>
@@ -23,5 +24,6 @@
     <!-- Scale Status -->
     <color name="color_status_none">#74969696</color>
     <color name="color_status_online">#8023C43B</color>
+    <color name="color_status_medium">#80EDCC2B</color>
     <color name="color_status_offline">#80FF5353</color>
 </resources>

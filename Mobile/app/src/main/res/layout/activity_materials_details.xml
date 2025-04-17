@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:padding="10dp">
+    <!-- tools:context=".HomeActivity"-->
+
+    <!-- En-tête avec le nom de la machine et bouton de retour -->
+    <LinearLayout
+        android:id="@+id/linearLayout_machine_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <!-- Bouton pour retourner à l'écran précédent -->
+        <ImageButton
+            android:id="@+id/return_from_deviceDetails"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/return_arrow"
+            android:contentDescription="Retour vers la page des appareils"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <!-- Nom de la machine (tronqué si trop long) -->
+        <TextView
+            android:id="@+id/tv_deviceDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:maxWidth="180dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Nom machine"
+            android:textAlignment="center"
+            android:textColor="@color/bleu_gestion_visible"
+            android:textSize="24sp"
+            android:textStyle="bold"/>
+
+        <!-- Statut de connexion de la machine (online/offline) -->
+        <TextView
+            android:id="@+id/tv_machine_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/offline_status"
+            android:paddingStart="10dp"
+            android:layout_marginStart="20dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="@string/offline"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Conteneur principal pour tous les détails de la machine -->
+    <LinearLayout
+        android:id="@+id/linearLayout_everyDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayout_machine_name"
+        android:layout_marginTop="20dp"
+        android:paddingHorizontal="10dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+
+        <!-- Section: Statut global de la machine -->
+        <LinearLayout
+            android:id="@+id/linearLayout_globalStatus"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="start"
+            android:padding="8dp"
+            android:background="@drawable/rounded_corner_8">
+
+            <TextView
+                android:id="@+id/tv_globalStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SensorTitle"
+                android:text="@string/global_status"/>
+            <TextView
+                android:id="@+id/tv_globalStatus_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/none_status"
+                android:text="@string/status_unknow"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+        </LinearLayout>
+
+        <!-- Section: Statut de l'accéléromètre -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_corner_8"
+            android:layout_marginTop="20dp"
+            android:padding="8dp">
+
+        <LinearLayout
+            android:id="@+id/linearLayout_accelerometerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start">
+
+            <TextView
+                android:id="@+id/tv_accelerometerStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SensorTitle"
+                android:text="@string/accelerometer_status"/>
+            <TextView
+                android:id="@+id/tv_accelerometerStatus_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/none_status"
+                android:text="@string/status_unknow"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+        </LinearLayout>
+
+        <!-- Détails des axes de l'accéléromètre (X, Y, Z et Norme) -->
+        <LinearLayout
+            android:id="@+id/linearLayout_accelerometerStatusDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="2dp">
+
+            <!-- Valeur de l'axe X -->
+            <TextView
+                android:id="@+id/tv_accelerometerStatusX"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/accelerometerX_status"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/tv_accelerometerStatusX_details"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="5dp"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+
+            <!-- Valeur de l'axe Y -->
+            <TextView
+                android:id="@+id/tv_accelerometerStatusY"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/accelerometerY_status"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/tv_accelerometerStatusY_details"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="5dp"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+
+            <!-- Valeur de l'axe Z -->
+            <TextView
+                android:id="@+id/tv_accelerometerStatusZ"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/accelerometerZ_status"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/tv_accelerometerStatusZ_details"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="5dp"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+
+            <!-- Valeur de la norme (magnitude) -->
+            <TextView
+                android:id="@+id/tv_accelerometerStatusNorm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/accelerometerNorm_status"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/tv_accelerometerStatusNorm_details"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+        </LinearLayout>
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_corner_8"
+        android:layout_marginTop="20dp"
+        android:padding="8dp">
+        <!-- Section: Statut du capteur de poids -->
+        <LinearLayout
+            android:id="@+id/linearLayout_weightSensorStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start">
+
+            <TextView
+                android:id="@+id/tv_weightSensorStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SensorTitle"
+                android:text="@string/weightSensor_status"/>
+            <TextView
+                android:id="@+id/tv_weightSensorStatus_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/none_status"
+                android:text="@string/status_unknow"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+        </LinearLayout>
+
+        <!-- Détails: Poids détecté -->
+        <LinearLayout
+            android:id="@+id/linearLayout_weightSensorStatusDetails_weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start"
+            android:layout_marginHorizontal="8dp"
+            android:padding="2dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detected_weight"
+                android:textSize="16sp"
+                android:layout_marginEnd="10dp"/>
+            <TextView
+                android:id="@+id/tv_weightValueStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- Détails: Index de calibration -->
+        <LinearLayout
+            android:id="@+id/linearLayout_weightSensorStatusDetails_calibrationIndex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start"
+            android:layout_marginHorizontal="8dp"
+            android:padding="2dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/calibration_index"
+                android:textSize="16sp"
+                android:layout_marginEnd="10dp"/>
+            <TextView
+                android:id="@+id/tv_calibrationIndex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/status_unknow"
+                android:textSize="16sp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+        <!-- Section: Statut de l'affichage des pierres -->
+        <LinearLayout
+            android:id="@+id/linearLayout_stoneDisplayStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="start"
+            android:padding="8dp"
+            android:background="@drawable/rounded_corner_8">
+
+            <TextView
+                android:id="@+id/tv_stoneDisplayStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SensorTitle"
+                android:text="@string/stoneDisplay_status"/>
+            <TextView
+                android:id="@+id/tv_stoneDisplayStatus_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/none_status"
+                android:text="@string/status_unknow"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+        </LinearLayout>
+
+        <!-- Section: Liste des utilisateurs associés -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_corner_8"
+        android:layout_marginTop="20dp"
+        android:padding="8dp">
+        <TextView
+            android:id="@+id/tv_associateUserList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/SensorTitle"
+            android:text="@string/associated_user_list"/>
+
+        <!-- Liste des utilisateurs associés à cette machine -->
+        <ListView
+            android:id="@+id/list_associateUserToThisDevice"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scrollbars="vertical"
+            android:divider="@color/bleu_gestion_t"
+            android:dividerHeight="1dp"/>
+    </LinearLayout>gi
+    </LinearLayout>
+</RelativeLayout>
