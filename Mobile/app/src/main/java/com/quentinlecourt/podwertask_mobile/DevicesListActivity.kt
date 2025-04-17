@@ -1,5 +1,6 @@
 package com.quentinlecourt.podwertask_mobile
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
@@ -64,6 +65,15 @@ class DevicesListActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_machines)
         recyclerView.layoutManager = LinearLayoutManager(this)
         machineAdapter = MachineAdapter(filteredMachines)
+        { selectedMachine ->
+            val intent = Intent(this, MaterialsDetailsActivity::class.java).apply {
+                putExtra("MACHINE_NAME", selectedMachine.name)
+                putExtra("IS_ONLINE", selectedMachine.isOnline)
+                putExtra("IS_ACCELEROMETER_CORRECT", selectedMachine.isSensorAccelerometerCorrect)
+                putExtra("IS_WEIGHT_CORRECT", selectedMachine.isSensorWeightCorrect)
+            }
+            startActivity(intent)
+        }
         recyclerView.adapter = machineAdapter
 
         // Bouton de retour (ferme simplement l'activité)

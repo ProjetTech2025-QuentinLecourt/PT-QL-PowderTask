@@ -316,6 +316,7 @@
 
         <!-- Section: Liste des utilisateurs associés -->
     <LinearLayout
+        android:id="@+id/linearLayout_associateUserToThisDevice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -333,10 +334,10 @@
         <ListView
             android:id="@+id/list_associateUserToThisDevice"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="200dp"
             android:scrollbars="vertical"
             android:divider="@color/bleu_gestion_t"
             android:dividerHeight="1dp"/>
-    </LinearLayout>gi
+    </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

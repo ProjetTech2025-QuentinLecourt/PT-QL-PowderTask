@@ -24,6 +24,6 @@
     <!-- Scale Status -->
     <color name="color_status_none">#74969696</color>
     <color name="color_status_online">#8023C43B</color>
-    <color name="color_status_medium">#80EDCC2B</color>
+    <color name="color_status_medium">#80F4EB41</color>
     <color name="color_status_offline">#80FF5353</color>
 </resources>

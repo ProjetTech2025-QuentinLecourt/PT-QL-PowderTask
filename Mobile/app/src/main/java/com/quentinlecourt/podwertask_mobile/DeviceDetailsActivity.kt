@@ -1,8 +1,10 @@
 package com.quentinlecourt.podwertask_mobile
 
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -32,13 +34,31 @@ class MaterialsDetailsActivity : AppCompatActivity() {
     private lateinit var stoneDisplayStatusTextView: TextView
     private lateinit var stoneDisplayStatusStatusTextView: TextView
     private lateinit var associateUserListView: ListView
+    private lateinit var associateUserListLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_materials_details)
 
+        val machineName = intent.getStringExtra("MACHINE_NAME") ?: "Nom inconnu"
+        val isOnline = intent.getBooleanExtra("IS_ONLINE", false)
+
         // Initialisation des vues
         initViews()
+
+        deviceNameTextView.text = machineName
+
+        if (isOnline) {
+            machineStatusTextView.text = getString(R.string.online)
+            machineStatusTextView.setBackgroundResource(R.drawable.online_status)
+        } else {
+            machineStatusTextView.text = getString(R.string.offline)
+            machineStatusTextView.setBackgroundResource(R.drawable.offline_status)
+        }
+
+        // TODO : GONE si l'utilisateur est un employé
+        // TODO : Afficher si l'utilisateur est un Chef d'équipe et aller chercher la liste des personnes associées dans l'API
+        // associateUserListLayout.visibility = View.GONE
 
         // Configuration du bouton de retour
         returnButton.setOnClickListener {
@@ -46,7 +66,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         }
 
         // Exemple de données pour démonstration
-        setupSampleData()
+        //setupSampleData()
     }
 
     private fun initViews() {
@@ -72,10 +92,12 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         stoneDisplayStatusTextView = findViewById(R.id.tv_stoneDisplayStatus)
         stoneDisplayStatusStatusTextView = findViewById(R.id.tv_stoneDisplayStatus_status)
         associateUserListView = findViewById(R.id.list_associateUserToThisDevice)
+        associateUserListLayout = findViewById(R.id.linearLayout_associateUserToThisDevice)
     }
 
     private fun setupSampleData() {
-
+        // TODO : Récupération des détails par le broker
+        // TODO : gérer les déconnexion d'une balance
         deviceNameTextView.text = "Powder Scale - 01"
         machineStatusTextView.text = getString(R.string.online)
         machineStatusTextView.setBackgroundResource(R.drawable.online_status)
@@ -87,10 +109,10 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         // Accéléromètre
         accelerometerStatusStatusTextView.text = getString(R.string.on_move)
         accelerometerStatusStatusTextView.setBackgroundResource(R.drawable.medium_status)
-        accelerometerXDetailsTextView.text = "0.12"
-        accelerometerYDetailsTextView.text = "0.05"
-        accelerometerZDetailsTextView.text = "1.02"
-        accelerometerNormDetailsTextView.text = "1.03"
+        accelerometerXDetailsTextView.text = "-0.12"
+        accelerometerYDetailsTextView.text = "-0.05"
+        accelerometerZDetailsTextView.text = "-1.02"
+        accelerometerNormDetailsTextView.text = "-1.03"
 
         // Capteur de poids
         weightSensorStatusStatusTextView.text = getString(R.string.incoherent)
@@ -103,7 +125,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         stoneDisplayStatusStatusTextView.setBackgroundResource(R.drawable.offline_status)
 
         // Liste des utilisateurs associés
-        val users = listOf("Jean Dupont", "Marie Martin", "Pierre Durand","Jean Dupont", "Marie Martin", "Pierre Durand","Jean Dupont", "Marie Martin", "Pierre Durand")
+        val users = listOf("Jean Dupont", "Marie Martin")
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, users)
         associateUserListView.adapter = adapter
     }

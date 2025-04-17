@@ -9,7 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quentinlecourt.podwertask_mobile.R
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
 
-class MachineAdapter(private val machines: List<Machine>) : RecyclerView.Adapter<MachineAdapter.MachineViewHolder>() {
+class MachineAdapter(
+    private val machines: List<Machine>,
+    private val onItemClick: (Machine) -> Unit
+) : RecyclerView.Adapter<MachineAdapter.MachineViewHolder>() {
 
     class MachineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val machineName: TextView = itemView.findViewById(R.id.tv_machine_name)
@@ -76,6 +79,10 @@ class MachineAdapter(private val machines: List<Machine>) : RecyclerView.Adapter
             holder.weightSensorStatus.setBackground(
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.none_status)
             )
+        }
+        // Ajout du clic sur l'item
+        holder.itemView.setOnClickListener {
+            onItemClick(currentMachine)
         }
     }
 
