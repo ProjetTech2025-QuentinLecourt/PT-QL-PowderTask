@@ -3,7 +3,8 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class SessionManager(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
 
     companion object {
         const val USER_TOKEN = "bearer_token"

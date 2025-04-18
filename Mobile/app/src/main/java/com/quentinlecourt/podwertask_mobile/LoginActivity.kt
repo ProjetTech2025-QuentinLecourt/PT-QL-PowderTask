@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Email/mot de passe requis", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            // Exécuter l'appel réseau dans un CoroutineScope
+
             lifecycleScope.launch {
                 try {
                     val loginRequest = LoginRequest(email, password)

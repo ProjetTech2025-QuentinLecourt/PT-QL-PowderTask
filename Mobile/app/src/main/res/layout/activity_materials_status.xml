@@ -18,9 +18,8 @@
             android:id="@+id/return_from_devicesListPage"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/return_arrow"
-            android:layout_marginEnd="16dp" />
-
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/return_arrow" />
 
         <TextView
             android:id="@+id/tv_devicesListTitle"
@@ -30,7 +29,7 @@
             android:textAlignment="center"
             android:textColor="@color/bleu_gestion_visible"
             android:textSize="24sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
@@ -39,11 +38,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/linearLayout_title"
         android:layout_marginTop="16dp"
-        android:paddingHorizontal="10dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp">
 
-    <LinearLayout
+        <LinearLayout
             android:id="@+id/linearLayout_checkBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -55,29 +54,29 @@
                 android:id="@+id/checkBox_onlineDevice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:buttonTint="@color/bleu_gestion_visible"
                 android:checked="false"
                 android:text="@string/checkBox_onlineDevices"
                 android:textColor="@color/bleu_gestion_visible"
-                android:textSize="16sp"
-                android:buttonTint="@color/bleu_gestion_visible" />
+                android:textSize="16sp" />
 
             <CheckBox
                 android:id="@+id/checkBox_problemDevice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:buttonTint="@color/bleu_gestion_visible"
                 android:checked="false"
                 android:text="@string/checkBox_withProblemDevices"
                 android:textColor="@color/bleu_gestion_visible"
-                android:textSize="16sp"
-                android:buttonTint="@color/bleu_gestion_visible" />
+                android:textSize="16sp" />
         </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/filterImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/icon_filter"
-                android:contentDescription="@string/desc_filter" />
+        <ImageButton
+            android:id="@+id/filterImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/icon_filter"
+            android:contentDescription="@string/desc_filter" />
 
     </LinearLayout>
 

@@ -4,48 +4,48 @@
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="300dp"
                 android:centerX="-20%"
                 android:centerY="120%"
+                android:endColor="#FFFFFF"
+                android:gradientRadius="300dp"
                 android:startColor="@color/orange_bg"
-                android:endColor="#FFFFFF" />
+                android:type="radial" />
         </shape>
     </item>
     <!--   Supérieur gauche     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="300dp"
                 android:centerX="-20%"
                 android:centerY="-20%"
+                android:endColor="#00FFFFFF"
+                android:gradientRadius="300dp"
                 android:startColor="@color/orange_bg"
-                android:endColor="#00FFFFFF" />
+                android:type="radial" />
         </shape>
     </item>
     <!--   Supérieur droit     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="300dp"
                 android:centerX="120%"
                 android:centerY="-20%"
+                android:endColor="#00FFFFFF"
+                android:gradientRadius="300dp"
                 android:startColor="@color/orange_bg"
-                android:endColor="#00FFFFFF" />
+                android:type="radial" />
         </shape>
     </item>
     <!--   Inferieur Droit     -->
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:type="radial"
-                android:gradientRadius="300dp"
                 android:centerX="120%"
                 android:centerY="120%"
+                android:endColor="#00FFFFFF"
+                android:gradientRadius="300dp"
                 android:startColor="@color/orange_bg"
-                android:endColor="#00FFFFFF" />
+                android:type="radial" />
         </shape>
     </item>
 </layer-list>

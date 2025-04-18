@@ -27,7 +27,8 @@ class MqttManager(private val context: Context) {
     private val brokerUrl = BuildConfig.MQTT_BASE_URL
     private val clientId = "PowderScaleMobile_" + UUID.randomUUID().toString()
 
-    private val subscriptions = mutableMapOf<Int, String>() // Map des IDs de machines aux topics souscrits
+    private val subscriptions =
+        mutableMapOf<Int, String>() // Map des IDs de machines aux topics souscrits
 
     private val lastMessages = mutableMapOf<Int, MachineDetails?>()
     private val lastOnlineStatus = mutableMapOf<Int, Boolean>()
@@ -60,7 +61,6 @@ class MqttManager(private val context: Context) {
                                 // Tentative de reconnexion
                                 connect { success ->
                                     if (success) {
-                                        // Réabonnement à tous les topics après reconnexion
                                         resubscribeToAllTopics()
                                     }
                                 }
@@ -136,9 +136,9 @@ class MqttManager(private val context: Context) {
             val details = gson.fromJson(statusJson, MachineDetails::class.java)
 
             // Stockage du dernier message
-            lastMessages[machineId] =  details
+            lastMessages[machineId] = details
 
-            val lastOnline = lastOnlineStatus[machineId]?: false
+            val lastOnline = lastOnlineStatus[machineId] ?: false
 
             // Notifier avec les dernières données
             statusCallback?.invoke(machineId, lastOnline, details)
@@ -194,7 +194,7 @@ class MqttManager(private val context: Context) {
         val detailsState = lastMessages[machineId]
 
         return if (onlineState != null || detailsState != null) {
-            val isOnline = onlineState?: false
+            val isOnline = onlineState ?: false
             val details = detailsState
             Pair(isOnline, details)
         } else {

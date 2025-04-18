@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 
-class HomeActivity: AppCompatActivity() {
+class HomeActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var tv_h_username: TextView
@@ -39,7 +39,7 @@ class HomeActivity: AppCompatActivity() {
         if (userFirstname != null) {
             if (userJob != null) {
                 when {
-                    userJob.isEmpty()  || userFirstname.isEmpty() -> {
+                    userJob.isEmpty() || userFirstname.isEmpty() -> {
                         tv_h_welcome.text = "Impossible de récupérer le job de l'utilisateur"
                         background.setBackgroundResource(R.color.white)
                     }
@@ -64,7 +64,7 @@ class HomeActivity: AppCompatActivity() {
             }
         }
 
-        btn_devicesList.setOnClickListener{
+        btn_devicesList.setOnClickListener {
             navigateToDevicesList()
         }
         btn_logout.setOnClickListener {

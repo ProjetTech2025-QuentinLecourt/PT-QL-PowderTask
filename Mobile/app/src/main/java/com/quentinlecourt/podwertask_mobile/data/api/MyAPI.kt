@@ -16,8 +16,10 @@ import retrofit2.http.GET
 interface MyAPI {
     @POST("login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
     @GET("mqtt")
     suspend fun getMqttId(): Response<MqttIdResponse>
+
     @GET("machines")
     suspend fun getMachines(): Response<ScaleResponse>
 

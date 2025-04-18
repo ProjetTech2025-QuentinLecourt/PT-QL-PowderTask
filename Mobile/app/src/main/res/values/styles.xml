@@ -7,6 +7,7 @@
         <item name="android:textStyle">bold</item>
         <item name="android:layout_marginBottom">4dp</item>
     </style>
+
     <style name="SensorValue">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/white</item>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Theme.App.TransparentNav" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Pour API 21+ (Android 5.0 et +) -->
         <item name="android:navigationBarColor">@android:color/transparent</item>

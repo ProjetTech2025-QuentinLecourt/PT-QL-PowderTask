@@ -11,48 +11,41 @@
     <!-- Traffic en dev avec l'API en http -->
     <!--android:usesCleartextTraffic="true"-->
     <application
-        android:networkSecurityConfig="@xml/network_security_config"
+        android:name=".PowderTaskApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher1"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher1_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.TransparentNav"
-        tools:targetApi="31"
-        android:name=".PowderTaskApplication">
+        tools:targetApi="31">
         <!-- Déclarer LoginActivity -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.App.TransparentNav" >
+            android:theme="@style/Theme.App.TransparentNav">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DevicesListActivity"
-                android:exported="true"
-                android:theme="@style/Theme.App.TransparentNav" >
-        <!--            <intent-filter>
-                     <action android:name="android.intent.action.MAIN" />
-
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>-->
-                </activity>
-
-                <!-- Déclarer MainActivity -->
+        <!-- Déclarer DevicesListActivity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true" />
+            android:name=".DevicesListActivity"
+            android:exported="true"
+            android:theme="@style/Theme.App.TransparentNav" />
+        <!-- Déclarer HomeActivity -->
         <activity
             android:name=".HomeActivity"
             android:exported="true" />
         <activity
             android:name=".MaterialsDetailsActivity"
-            android:exported="true"/>
+            android:exported="true" />
+
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>
 
