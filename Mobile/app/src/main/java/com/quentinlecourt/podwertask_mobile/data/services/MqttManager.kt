@@ -3,14 +3,17 @@ package com.quentinlecourt.podwertask_mobile.data.services
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.google.gson.Gson
 import com.quentinlecourt.podwertask_mobile.BuildConfig
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
 import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
+import com.quentinlecourt.podwertask_mobile.data.model.MachineDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.UUID
@@ -25,7 +28,11 @@ class MqttManager(private val context: Context) {
     private val clientId = "PowderScaleMobile_" + UUID.randomUUID().toString()
 
     private val subscriptions = mutableMapOf<Int, String>() // Map des IDs de machines aux topics souscrits
-    private var statusCallback: ((Int, Boolean, Map<String, Boolean>) -> Unit)? = null
+
+    private val lastMessages = mutableMapOf<Int, MachineDetails?>()
+    private val lastOnlineStatus = mutableMapOf<Int, Boolean>()
+
+    private var statusCallback: ((Int, Boolean, MachineDetails?) -> Unit)? = null
 
     fun connect(callback: (Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -65,12 +72,22 @@ class MqttManager(private val context: Context) {
                                     Log.d(TAG, "Message reçu sur $topic: $payload")
 
                                     // Analyser le topic pour extraire l'ID de la machine
-                                    if (topic?.contains("/status") == true) {
+                                    if (topic?.contains("/status/details") == true) {
                                         val parts = topic.split("/")
                                         if (parts.size >= 3) {
                                             val machineId = parts[2].toIntOrNull()
                                             if (machineId != null) {
-                                                parseStatusMessage(machineId, payload)
+                                                parseDetailsStatusMessage(machineId, payload)
+                                            }
+                                        }
+                                    }
+                                    // Analyser le topic pour extraire l'ID de la machine
+                                    if (topic?.contains("/status/online") == true) {
+                                        val parts = topic.split("/")
+                                        if (parts.size >= 3) {
+                                            val machineId = parts[2].toIntOrNull()
+                                            if (machineId != null) {
+                                                parseOnlineStatusMessage(machineId, payload)
                                             }
                                         }
                                     }
@@ -109,22 +126,43 @@ class MqttManager(private val context: Context) {
         }
     }
 
-    private fun parseStatusMessage(machineId: Int, statusJson: String) {
+    fun setStatusCallback(callback: (Int, Boolean, MachineDetails?) -> Unit) {
+        this.statusCallback = callback
+    }
+
+    private fun parseDetailsStatusMessage(machineId: Int, statusJson: String) {
         try {
-            val isOnline = true
-            val sensors = mutableMapOf<String, Boolean>()
+            val gson = Gson()
+            val details = gson.fromJson(statusJson, MachineDetails::class.java)
 
-            // extraction d'états de capteurs
-            if (statusJson.contains("\"accelerometer\":true")) sensors["accelerometer"] = true
-            if (statusJson.contains("\"accelerometer\":false")) sensors["accelerometer"] = false
-            if (statusJson.contains("\"weightSensor\":true")) sensors["weightSensor"] = true
-            if (statusJson.contains("\"weightSensor\":false")) sensors["weightSensor"] = false
+            // Stockage du dernier message
+            lastMessages[machineId] =  details
 
-            // Notifier le callback avec l'ID et les données
-            statusCallback?.invoke(machineId, isOnline, sensors)
+            val lastOnline = lastOnlineStatus[machineId]?: false
+
+            // Notifier avec les dernières données
+            statusCallback?.invoke(machineId, lastOnline, details)
 
         } catch (e: Exception) {
-            Log.e(TAG, "Erreur lors du parsing du message de statut", e)
+            Log.e(TAG, "Erreur lors du parsing du message de détails", e)
+        }
+    }
+
+    private fun parseOnlineStatusMessage(machineId: Int, statusJson: String) {
+        try {
+            val jsonObject = JSONObject(statusJson)
+            val isOnline = jsonObject.optBoolean("online", false)
+
+            // Stockage du dernier message
+            lastOnlineStatus[machineId] = isOnline
+
+            val lastDetails = lastMessages[machineId]
+
+            // Notifier avec les dernières données
+            statusCallback?.invoke(machineId, isOnline, lastDetails)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Erreur lors du parsing du message online", e)
         }
     }
 
@@ -135,37 +173,52 @@ class MqttManager(private val context: Context) {
         }
 
         val statusTopic = "/scale/$machineId/status"
+        val onlineStatusTopic = "$statusTopic/online"
+        val detailsStatusTopic = "$statusTopic/details"
+
         try {
-            mqttClient?.subscribe(statusTopic, 1) // Simplifié avec juste le topic et QoS
-            Log.d(TAG, "Abonnement réussi à $statusTopic")
-            subscriptions[machineId] = statusTopic
-            // Envoyer immédiatement une demande de statut
-            requestMachineStatus(machineId)
+            mqttClient?.subscribe(onlineStatusTopic, 1)
+            Log.d(TAG, "Abonnement réussi à $onlineStatusTopic")
+            subscriptions[machineId] = onlineStatusTopic
+            mqttClient?.subscribe(detailsStatusTopic, 1)
+
+            Log.d(TAG, "Abonnement réussi à $detailsStatusTopic")
+            subscriptions[machineId] = detailsStatusTopic
         } catch (e: MqttException) {
             Log.e(TAG, "Erreur lors de l'abonnement à $statusTopic", e)
         }
     }
 
-    fun requestMachineStatus(machineId: Int) {
-        if (mqttClient == null || !mqttClient!!.isConnected) {
-            Log.w(TAG, "Client MQTT non connecté, impossible d'envoyer la commande")
-            return
-        }
+    fun getLastKnownState(machineId: Int): Pair<Boolean, MachineDetails?>? {
+        val onlineState = lastOnlineStatus[machineId]
+        val detailsState = lastMessages[machineId]
 
-        val commandTopic = "/scale/$machineId/commands"
-        val message = "{\"command\":\"get_status\"}"
-
-        try {
-            mqttClient?.publish(commandTopic, message.toByteArray(), 1, false)
-            Log.d(TAG, "Commande de statut envoyée à $commandTopic")
-        } catch (e: MqttException) {
-            Log.e(TAG, "Erreur lors de l'envoi de la commande à $commandTopic", e)
+        return if (onlineState != null || detailsState != null) {
+            val isOnline = onlineState?: false
+            val details = detailsState
+            Pair(isOnline, details)
+        } else {
+            null
         }
     }
 
-    fun setStatusCallback(callback: (Int, Boolean, Map<String, Boolean>) -> Unit) {
-        this.statusCallback = callback
-    }
+//      Va etre mise a jour plus tard
+//    fun requestMachineStatus(machineId: Int) {
+//        if (mqttClient == null || !mqttClient!!.isConnected) {
+//            Log.w(TAG, "Client MQTT non connecté, impossible d'envoyer la commande")
+//            return
+//        }
+//
+//        val commandTopic = "/scale/$machineId/commands"
+//        val message = "{\"command\":\"get_status\"}"
+//
+//        try {
+//            mqttClient?.publish(commandTopic, message.toByteArray(), 1, false)
+//            Log.d(TAG, "Commande de statut envoyée à $commandTopic")
+//        } catch (e: MqttException) {
+//            Log.e(TAG, "Erreur lors de l'envoi de la commande à $commandTopic", e)
+//        }
+//    }
 
     private fun resubscribeToAllTopics() {
         subscriptions.forEach { (machineId, topic) ->

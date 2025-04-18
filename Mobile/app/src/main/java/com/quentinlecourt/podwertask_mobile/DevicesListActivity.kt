@@ -42,23 +42,20 @@ class DevicesListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_materials_status)
 
-        // Initialiser MQTT Manager
         mqttManager = MqttManager(applicationContext)
 
-        // Connecter au broker MQTT
         mqttManager.connect { connected ->
             if (connected) {
-                // Abonner aux topics MQTT pour chaque machine
                 subscribeToAllMachines()
             } else {
                 runOnUiThread {
-                    Toast.makeText(this, "Échec de connexion au broker MQTT", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Échec de connexion au broker MQTT", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
 
         setupMqttStatusCallback()
-
         loadMachines()
 
         // Configurer la RecyclerView
@@ -69,18 +66,17 @@ class DevicesListActivity : AppCompatActivity() {
             val intent = Intent(this, MaterialsDetailsActivity::class.java).apply {
                 putExtra("MACHINE_NAME", selectedMachine.name)
                 putExtra("IS_ONLINE", selectedMachine.isOnline)
-                putExtra("IS_ACCELEROMETER_CORRECT", selectedMachine.isSensorAccelerometerCorrect)
-                putExtra("IS_WEIGHT_CORRECT", selectedMachine.isSensorWeightCorrect)
+                putExtra("IS_ACCELEROMETER_CORRECT", selectedMachine.accelerometerSensorStatus)
+                putExtra("IS_WEIGHT_CORRECT", selectedMachine.weightSensorStatus)
             }
             startActivity(intent)
         }
         recyclerView.adapter = machineAdapter
 
         // Bouton de retour (ferme simplement l'activité)
-        findViewById<ImageButton>(R.id.return_from_devicesListPage).setOnClickListener{
+        findViewById<ImageButton>(R.id.return_from_devicesListPage).setOnClickListener {
             finish()
         }
-
         // Configurer le bouton de tri
         findViewById<ImageButton>(R.id.filterImage).setOnClickListener { view ->
             showSortPopupMenu(view)
@@ -90,31 +86,23 @@ class DevicesListActivity : AppCompatActivity() {
         findViewById<CheckBox>(R.id.checkBox_onlineDevice).setOnCheckedChangeListener { _, _ ->
             filterMachines()
         }
-
         findViewById<CheckBox>(R.id.checkBox_problemDevice).setOnCheckedChangeListener { _, _ ->
             filterMachines()
         }
     }
 
     private fun setupMqttStatusCallback() {
-        mqttManager.setStatusCallback { machineId, isOnline, sensors ->
-            // Trouver la machine correspondante
+        mqttManager.setStatusCallback { machineId, isOnline, details ->
             val machine = machines.find { it.id == machineId }
             machine?.let {
-                // Mettre à jour les données de la machine
                 it.isOnline = isOnline
-                it.lastConnectionTime = System.currentTimeMillis()
-
-                // Mise à jour des capteurs
-                if (sensors.containsKey("accelerometer")) {
-                    it.isSensorAccelerometerCorrect = sensors["accelerometer"]!!
-                }
-                if (sensors.containsKey("weightSensor")) {
-                    it.isSensorWeightCorrect = sensors["weightSensor"]!!
-                }
+                it.lastConnectionTime = details?.timestamp
+                it.accelerometerSensorStatus = details?.accelerometer
+                it.weightSensorStatus = details?.weight_sensor
 
                 runOnUiThread {
                     filterMachines()
+                    machineAdapter.notifyItemChanged(filteredMachines.indexOfFirst { m -> m.id == machineId })
                 }
             }
         }
@@ -140,9 +128,9 @@ class DevicesListActivity : AppCompatActivity() {
                                 id = scaleDto.id,
                                 name = scaleDto.scale_name,
                                 isOnline = false,
-                                isSensorAccelerometerCorrect = null,
-                                isSensorWeightCorrect = null,
-                                lastConnectionTime = System.currentTimeMillis()
+                                accelerometerSensorStatus = null,
+                                weightSensorStatus = null,
+                                lastConnectionTime = null
                             )
                         }
 
@@ -189,35 +177,41 @@ class DevicesListActivity : AppCompatActivity() {
         val popup = PopupMenu(this, anchor) // Utiliser 'this' si dans une Activity
         popup.menuInflater.inflate(R.menu.scale_sort_menu, popup.menu)
 
-        when(currentSortMode) {
+        when (currentSortMode) {
             SortMode.A_TO_Z -> popup.menu.findItem(R.id.sort_az).isChecked = true
             SortMode.Z_TO_A -> popup.menu.findItem(R.id.sort_za).isChecked = true
-            SortMode.LAST_CONNECTION -> popup.menu.findItem(R.id.sort_last_connection).isChecked = true
-            SortMode.FIRST_CONNECTION -> popup.menu.findItem(R.id.sort_first_connection).isChecked = true
+            SortMode.LAST_CONNECTION -> popup.menu.findItem(R.id.sort_last_connection).isChecked =
+                true
+
+            SortMode.FIRST_CONNECTION -> popup.menu.findItem(R.id.sort_first_connection).isChecked =
+                true
         }
 
         popup.setOnMenuItemClickListener { item ->
-            when(item.itemId) {
+            when (item.itemId) {
                 R.id.sort_az -> {
                     currentSortMode = SortMode.A_TO_Z
                     true
                 }
+
                 R.id.sort_za -> {
                     currentSortMode = SortMode.Z_TO_A
                     true
                 }
+
                 R.id.sort_last_connection -> {
                     currentSortMode = SortMode.LAST_CONNECTION
                     true
                 }
+
                 R.id.sort_first_connection -> {
                     currentSortMode = SortMode.FIRST_CONNECTION
                     true
                 }
+
                 else -> false
             }.also { if (it) sortMachines() }
         }
-
         popup.show()
     }
 
@@ -228,19 +222,22 @@ class DevicesListActivity : AppCompatActivity() {
         filteredMachines.clear()
         filteredMachines.addAll(machines.filter { machine ->
             val matchesOnlineFilter = !showOnline || machine.isOnline
-            val matchesProblemFilter = !showProblem ||
-                    machine.isSensorAccelerometerCorrect == false ||
-                    machine.isSensorWeightCorrect == false
-            matchesOnlineFilter && matchesProblemFilter
+
+            val hasAccelerometerIssue = machine.accelerometerSensorStatus?.let { it < 2 } ?: false
+            val hasWeightSensorIssue = machine.weightSensorStatus?.let { it < 2 } ?: false
+            val hasAnyProblem = hasAccelerometerIssue || hasWeightSensorIssue
+
+            val isProblemMatch = !showProblem || hasAnyProblem
+
+            matchesOnlineFilter && isProblemMatch
         })
 
         applySorting()
-
         machineAdapter.notifyDataSetChanged()
     }
 
     private fun applySorting() {
-        filteredMachines.sortWith(when(currentSortMode) {
+        filteredMachines.sortWith(when (currentSortMode) {
             SortMode.A_TO_Z -> compareBy { it.name }
             SortMode.Z_TO_A -> compareByDescending { it.name }
             SortMode.LAST_CONNECTION -> compareByDescending { it.lastConnectionTime }
@@ -250,7 +247,6 @@ class DevicesListActivity : AppCompatActivity() {
 
     private fun sortMachines() {
         applySorting()
-
         machineAdapter.notifyDataSetChanged()
     }
 

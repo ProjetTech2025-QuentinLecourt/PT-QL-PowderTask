@@ -18,7 +18,8 @@
     <string name="desc_filter">Filtre</string>
 
     <!-- Devices Cart -->
-    <string name="last_connection">Dernière connexion :</string>
+    <string name="last_connection">Dernière mise à jour:</string>
+    <string name="default_datetime">--/--/---- --:--:--</string>
     <string name="online">En ligne</string>
     <string name="offline">Hors ligne</string>
 
@@ -50,5 +51,10 @@
     <string name="stoneDisplay_status">Ecran interactif :</string>
 
     <string name="associated_user_list">Liste des personnes associées:</string>
+
+    <string name="menu_a_z">"Tri alphabétique (A-Z)"</string>
+    <string name="menu_z_a">"Tri alphabétique inverse (Z-A)"</string>
+    <string name="menu_lastUpdateFirst">"Tri par date (récent)"</string>
+    <string name="menu_farUpdateFirst">"Tri par date (ancien)"</string>
 
 </resources>

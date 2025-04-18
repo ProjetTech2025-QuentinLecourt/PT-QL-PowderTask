@@ -5,10 +5,8 @@ data class Machine(
     val id: Int,
     val name: String,
     var isOnline: Boolean = false,
-    var isSensorAccelerometerCorrect: Boolean? = null,
-    var isSensorWeightCorrect: Boolean? = null,
-    var lastConnectionTime: Long? = 0
-) {
-    val hasAnyProblem: Boolean
-        get() = isSensorAccelerometerCorrect == false || isSensorWeightCorrect == false
-}
+    var accelerometerSensorStatus: Int? = 0,
+    var weightSensorStatus: Int? = 0,
+    var lastConnectionTime: Long?,
+    var lastDetails: MachineDetails? = null
+)

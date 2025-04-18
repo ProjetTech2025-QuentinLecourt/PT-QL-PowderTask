@@ -55,6 +55,7 @@
                 android:textSize="12sp" />
         </RelativeLayout>
         <LinearLayout
+            android:id="@+id/layout_machineTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -67,10 +68,11 @@
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp" />
             <TextView
+                android:id="@+id/tv_machineTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="12/03/2003 12:12:33"
+                android:text="@string/default_datetime"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp" />
         </LinearLayout>
