@@ -75,13 +75,19 @@
 
         <!-- Section: Statut global de la machine -->
         <LinearLayout
-            android:id="@+id/linearLayout_globalStatus"
+            android:id="@+id/linearLayout_globalStatus_v"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:gravity="start"
             android:padding="8dp"
             android:background="@drawable/rounded_corner_8">
+            <LinearLayout
+                android:id="@+id/linearLayout_globalStatus_h"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start">
 
             <TextView
                 android:id="@+id/tv_globalStatus"
@@ -98,6 +104,28 @@
                 android:text="@string/status_unknow"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/last_connection"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="12/03/2003 12:12:33"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="16sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Section: Statut de l'accéléromètre -->

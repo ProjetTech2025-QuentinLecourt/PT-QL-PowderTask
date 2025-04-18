@@ -24,8 +24,7 @@
         <!-- En-tête avec nom de machine et statut -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp">
+            android:layout_height="wrap_content">
 
             <!-- Nom de la machine -->
 
@@ -38,9 +37,7 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:text="Nom de la machine"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                style="@style/SensorTitle" />
 
             <TextView
                 android:id="@+id/tv_machine_status"
@@ -57,12 +54,34 @@
                 android:textColor="@android:color/white"
                 android:textSize="12sp" />
         </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:text="@string/last_connection"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="12/03/2003 12:12:33"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp" />
+        </LinearLayout>
+
 
         <!-- Détails des composants -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="14dp">
 
             <!-- Accéléromètre -->
             <LinearLayout
