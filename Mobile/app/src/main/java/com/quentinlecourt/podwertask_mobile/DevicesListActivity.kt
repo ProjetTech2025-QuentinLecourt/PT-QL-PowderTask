@@ -123,7 +123,7 @@ class DevicesListActivity : AppCompatActivity() {
 
                     if (scaleResponse?.data?.scales != null) {  // Vérification null explicite
                         // Convertir les ScaleDto en Machine
-                        val newMachines = scaleResponse.data.scales.mapNotNull { scaleDto ->
+                        val newMachines = scaleResponse.data.scales.map { scaleDto ->
                             Machine(
                                 id = scaleDto.id,
                                 name = scaleDto.scale_name,

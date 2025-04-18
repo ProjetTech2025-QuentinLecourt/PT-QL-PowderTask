@@ -57,15 +57,13 @@ class MachineAdapter(
         // Définir le statut de la machine et sa couleur d'arrière plan
         if (currentMachine.isOnline) {
             holder.machineStatus.text = holder.itemView.context.getString(R.string.online)
-            holder.machineStatus.setBackground(
+            holder.machineStatus.background =
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.online_status)
-            )
 
         } else {
             holder.machineStatus.text = holder.itemView.context.getString(R.string.offline)
-            holder.machineStatus.setBackground(
+            holder.machineStatus.background =
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.offline_status)
-            )
         }
         // Mise à jour des autres composants
         if (currentMachine.lastConnectionTime == null) {
@@ -84,16 +82,14 @@ class MachineAdapter(
             2 -> strStable
             else -> strNoInfo
         }
-        holder.accelerometerStatus.setBackground(
-            AppCompatResources.getDrawable(
-                holder.itemView.context,
-                when (currentMachine.accelerometerSensorStatus) {
-                    0 -> colorPanic
-                    1 -> colorProblem
-                    2 -> colorOk
-                    else -> colorUnknow
-                }
-            )
+        holder.accelerometerStatus.background = AppCompatResources.getDrawable(
+            holder.itemView.context,
+            when (currentMachine.accelerometerSensorStatus) {
+                0 -> colorPanic
+                1 -> colorProblem
+                2 -> colorOk
+                else -> colorUnknow
+            }
         )
 
         holder.weightSensorStatus.text = when (currentMachine.weightSensorStatus) {
@@ -102,16 +98,14 @@ class MachineAdapter(
             2 -> strStable
             else -> strNoInfo
         }
-        holder.weightSensorStatus.setBackground(
-            AppCompatResources.getDrawable(
-                holder.itemView.context,
-                when (currentMachine.weightSensorStatus) {
-                    0 -> colorPanic
-                    1 -> colorProblem
-                    2 -> colorOk
-                    else -> colorUnknow
-                }
-            )
+        holder.weightSensorStatus.background = AppCompatResources.getDrawable(
+            holder.itemView.context,
+            when (currentMachine.weightSensorStatus) {
+                0 -> colorPanic
+                1 -> colorProblem
+                2 -> colorOk
+                else -> colorUnknow
+            }
         )
         // Ajout du clic sur l'item
         holder.itemView.setOnClickListener {

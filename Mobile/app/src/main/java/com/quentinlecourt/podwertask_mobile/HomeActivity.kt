@@ -13,10 +13,10 @@ import com.google.gson.Gson
 class HomeActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
-    private lateinit var tv_h_username: TextView
-    private lateinit var tv_h_welcome: TextView
-    private lateinit var btn_devicesList: Button
-    private lateinit var btn_logout: Button
+    private lateinit var tvUsername: TextView
+    private lateinit var tvWelcome: TextView
+    private lateinit var btnDevicesList: Button
+    private lateinit var btnLogout: Button
     private lateinit var background: RelativeLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,53 +25,52 @@ class HomeActivity : AppCompatActivity() {
 
         background = findViewById(R.id.rl_backgroundHome)
 
-        tv_h_username = findViewById(R.id.tv_h_username)
-        tv_h_welcome = findViewById(R.id.tv_h_welcome)
-        btn_devicesList = findViewById(R.id.btn_devicesList)
-        btn_logout = findViewById(R.id.btn_logout)
+        tvUsername = findViewById(R.id.tv_h_username)
+        tvWelcome = findViewById(R.id.tv_h_welcome)
+        btnLogout = findViewById(R.id.btn_logout)
+        btnDevicesList = findViewById(R.id.btn_devicesList)
 
         val token = sessionManager.fetchAuthToken()
         val claims = token?.decodeJwt()
         val userFirstname = claims?.get("firstname")
-        println(claims)
         val userJob = claims?.get("job")
 
         if (userFirstname != null) {
             if (userJob != null) {
                 when {
                     userJob.isEmpty() || userFirstname.isEmpty() -> {
-                        tv_h_welcome.text = "Impossible de récupérer le job de l'utilisateur"
+                        tvWelcome.text = "Impossible de récupérer le job de l'utilisateur"
                         background.setBackgroundResource(R.color.white)
                     }
 
                     userJob == "CE" -> {
-                        tv_h_welcome.text = getString(R.string.welcome_admin)
-                        tv_h_username.text = userFirstname
+                        tvWelcome.text = getString(R.string.welcome_admin)
+                        tvUsername.text = userFirstname
                         background.setBackgroundResource(R.drawable.admin_background)
                     }
 
                     userJob == "P" || userJob == "OP" -> {
-                        tv_h_welcome.text = getString(R.string.welcome_user)
-                        tv_h_username.text = userFirstname
+                        tvWelcome.text = getString(R.string.welcome_user)
+                        tvUsername.text = userFirstname
                         background.setBackgroundResource(R.drawable.background)
                     }
 
                     else -> {
-                        tv_h_welcome.text = "Le job de l'utilisateur n'est pas valide"
+                        tvWelcome.text = "Le job de l'utilisateur n'est pas valide"
 
                     }
                 }
             }
         }
 
-        btn_devicesList.setOnClickListener {
-            navigateToDevicesList()
-        }
-        btn_logout.setOnClickListener {
+        btnLogout.setOnClickListener {
             sessionManager.clearSession()
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
+        }
+        btnDevicesList.setOnClickListener {
+            navigateToDevicesList()
         }
     }
 
