@@ -66,17 +66,17 @@ class MachineAdapter(
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.offline_status)
         }
         // Mise à jour des autres composants
-        if (currentMachine.lastConnectionTime == null) {
+        if (currentMachine.datetimeDelivery == null) {
             holder.machineTimeLayout.visibility = View.GONE
         } else {
             holder.machineTimeLayout.visibility = View.VISIBLE
-            holder.machineTimeTextView.text = currentMachine.lastConnectionTime?.let { seconds ->
+            holder.machineTimeTextView.text = currentMachine.datetimeDelivery?.let { seconds ->
                 SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
                     .format(Date(seconds * 1000L))
             }
         }
 
-        holder.accelerometerStatus.text = when (currentMachine.accelerometerSensorStatus) {
+        holder.accelerometerStatus.text = when (currentMachine.accelerometerStatus) {
             0 -> strUnavailiable
             1 -> strOnMove
             2 -> strStable
@@ -84,7 +84,7 @@ class MachineAdapter(
         }
         holder.accelerometerStatus.background = AppCompatResources.getDrawable(
             holder.itemView.context,
-            when (currentMachine.accelerometerSensorStatus) {
+            when (currentMachine.accelerometerStatus) {
                 0 -> colorPanic
                 1 -> colorProblem
                 2 -> colorOk

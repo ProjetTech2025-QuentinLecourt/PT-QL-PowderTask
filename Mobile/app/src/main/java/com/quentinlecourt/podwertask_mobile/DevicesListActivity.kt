@@ -64,10 +64,7 @@ class DevicesListActivity : AppCompatActivity() {
         machineAdapter = MachineAdapter(filteredMachines)
         { selectedMachine ->
             val intent = Intent(this, MaterialsDetailsActivity::class.java).apply {
-                putExtra("MACHINE_NAME", selectedMachine.name)
-                putExtra("IS_ONLINE", selectedMachine.isOnline)
-                putExtra("IS_ACCELEROMETER_CORRECT", selectedMachine.accelerometerSensorStatus)
-                putExtra("IS_WEIGHT_CORRECT", selectedMachine.weightSensorStatus)
+                putExtra("MACHINE", selectedMachine)
             }
             startActivity(intent)
         }
@@ -92,13 +89,13 @@ class DevicesListActivity : AppCompatActivity() {
     }
 
     private fun setupMqttStatusCallback() {
-        mqttManager.setStatusCallback { machineId, isOnline, details ->
+        mqttManager.setStatusCallback { machineId, isOnline, machineDetails ->
             val machine = machines.find { it.id == machineId }
             machine?.let {
                 it.isOnline = isOnline
-                it.lastConnectionTime = details?.timestamp
-                it.accelerometerSensorStatus = details?.accelerometer
-                it.weightSensorStatus = details?.weight_sensor
+                it.datetimeDelivery = machineDetails?.datetimeDelivery
+                it.accelerometerStatus = machineDetails?.accelerometerStatus
+                it.weightSensorStatus = machineDetails?.weightSensorStatus
 
                 runOnUiThread {
                     filterMachines()
@@ -128,9 +125,16 @@ class DevicesListActivity : AppCompatActivity() {
                                 id = scaleDto.id,
                                 name = scaleDto.scale_name,
                                 isOnline = false,
-                                accelerometerSensorStatus = null,
+                                accelerometerStatus = null,
+                                accX = null,
+                                accY = null,
+                                accZ = null,
+                                accNorm = null,
                                 weightSensorStatus = null,
-                                lastConnectionTime = null
+                                weightDetected = null,
+                                calibrationIndex = null,
+                                display = null,
+                                datetimeDelivery = null
                             )
                         }
 
@@ -223,7 +227,7 @@ class DevicesListActivity : AppCompatActivity() {
         filteredMachines.addAll(machines.filter { machine ->
             val matchesOnlineFilter = !showOnline || machine.isOnline
 
-            val hasAccelerometerIssue = machine.accelerometerSensorStatus?.let { it < 2 } ?: false
+            val hasAccelerometerIssue = machine.accelerometerStatus?.let { it < 2 } ?: false
             val hasWeightSensorIssue = machine.weightSensorStatus?.let { it < 2 } ?: false
             val hasAnyProblem = hasAccelerometerIssue || hasWeightSensorIssue
 
@@ -240,8 +244,8 @@ class DevicesListActivity : AppCompatActivity() {
         filteredMachines.sortWith(when (currentSortMode) {
             SortMode.A_TO_Z -> compareBy { it.name }
             SortMode.Z_TO_A -> compareByDescending { it.name }
-            SortMode.LAST_CONNECTION -> compareByDescending { it.lastConnectionTime }
-            SortMode.FIRST_CONNECTION -> compareBy { it.lastConnectionTime }
+            SortMode.LAST_CONNECTION -> compareByDescending { it.datetimeDelivery }
+            SortMode.FIRST_CONNECTION -> compareBy { it.datetimeDelivery }
         })
     }
 

@@ -37,7 +37,6 @@
             android:focusable="true"
             android:maxWidth="180dp"
             android:maxLines="2"
-            android:text="Nom machine"
             android:textAlignment="center"
             android:textColor="@color/bleu_gestion_visible"
             android:textSize="24sp"
@@ -122,6 +121,7 @@
                     android:textSize="16sp" />
 
                 <TextView
+                    android:id="@+id/tv_machineDateTime_details"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

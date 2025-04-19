@@ -7,15 +7,13 @@ import com.google.gson.Gson
 import com.quentinlecourt.podwertask_mobile.BuildConfig
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
 import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
-import com.quentinlecourt.podwertask_mobile.data.model.MachineDetails
+import com.quentinlecourt.podwertask_mobile.data.model.Machine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.json.JSONObject
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.UUID
 
 class MqttManager(private val context: Context) {
@@ -30,10 +28,10 @@ class MqttManager(private val context: Context) {
     private val subscriptions =
         mutableMapOf<Int, String>() // Map des IDs de machines aux topics souscrits
 
-    private val lastMessages = mutableMapOf<Int, MachineDetails?>()
+    private val lastMessages = mutableMapOf<Int, Machine?>()
     private val lastOnlineStatus = mutableMapOf<Int, Boolean>()
 
-    private var statusCallback: ((Int, Boolean, MachineDetails?) -> Unit)? = null
+    private var statusCallback: ((Int, Boolean, Machine?) -> Unit)? = null
 
     fun connect(callback: (Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -126,14 +124,14 @@ class MqttManager(private val context: Context) {
         }
     }
 
-    fun setStatusCallback(callback: (Int, Boolean, MachineDetails?) -> Unit) {
+    fun setStatusCallback(callback: (Int, Boolean, Machine?) -> Unit) {
         this.statusCallback = callback
     }
 
     private fun parseDetailsStatusMessage(machineId: Int, statusJson: String) {
         try {
             val gson = Gson()
-            val details = gson.fromJson(statusJson, MachineDetails::class.java)
+            val details = gson.fromJson(statusJson, Machine::class.java)
 
             // Stockage du dernier message
             lastMessages[machineId] = details
@@ -189,7 +187,7 @@ class MqttManager(private val context: Context) {
         }
     }
 
-    fun getLastKnownState(machineId: Int): Pair<Boolean, MachineDetails?>? {
+    fun getLastKnownState(machineId: Int): Pair<Boolean, Machine?>? {
         val onlineState = lastOnlineStatus[machineId]
         val detailsState = lastMessages[machineId]
 
