@@ -93,9 +93,16 @@ class DevicesListActivity : AppCompatActivity() {
             val machine = machines.find { it.id == machineId }
             machine?.let {
                 it.isOnline = isOnline
-                it.datetimeDelivery = machineDetails?.datetimeDelivery
                 it.accelerometerStatus = machineDetails?.accelerometerStatus
+                it.accX = machineDetails?.accX
+                it.accY = machineDetails?.accY
+                it.accZ = machineDetails?.accZ
+                it.accNorm = machineDetails?.accNorm
                 it.weightSensorStatus = machineDetails?.weightSensorStatus
+                it.weightDetected = machineDetails?.weightDetected
+                it.calibrationIndex = machineDetails?.calibrationIndex
+                it.display = machineDetails?.display
+                it.datetimeDelivery = machineDetails?.datetimeDelivery
 
                 runOnUiThread {
                     filterMachines()

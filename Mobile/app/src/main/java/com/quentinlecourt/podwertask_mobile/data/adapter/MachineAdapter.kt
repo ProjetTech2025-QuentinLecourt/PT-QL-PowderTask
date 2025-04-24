@@ -66,6 +66,8 @@ class MachineAdapter(
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.offline_status)
         }
         // Mise à jour des autres composants
+
+        // TODO : Recycler cette fonction
         if (currentMachine.datetimeDelivery == null) {
             holder.machineTimeLayout.visibility = View.GONE
         } else {
