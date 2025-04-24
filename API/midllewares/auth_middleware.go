@@ -12,6 +12,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	BearerPrefix = "Bearer"
+	AuthHeader   = "Authorization"
+)
+
 // JWT_SECRET est la clé secrète utilisée pour signer et vérifier les JWT
 var JWT_SECRET []byte
 
@@ -33,9 +38,14 @@ func unauthorizedReturn(c *gin.Context, message string) {
 }
 
 // AuthMiddleware est le middleware pour vérifier le jwt
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(requiredJob ...string) gin.HandlerFunc {
+	job := ""
+	if len(requiredJob) > 0 {
+		job = requiredJob[0]
+	}
+
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
+		authHeader := c.GetHeader(AuthHeader)
 		if authHeader == "" {
 			unauthorizedReturn(c, "Token manquant")
 			return
@@ -43,7 +53,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Vérifie que le token utilise le schéma "Bearer"
 		tokenParts := strings.Split(authHeader, " ")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+		if len(tokenParts) != 2 || tokenParts[0] != BearerPrefix {
 			unauthorizedReturn(c, "Format de token invalide")
 			return
 		}
@@ -62,6 +72,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		if !token.Valid {
 			unauthorizedReturn(c, "Token invalide")
 			return
+		}
+
+		if job != "" {
+			if claims.Job == "" || job != claims.Job {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+				c.Abort()
+				return
+			}
 		}
 
 		// Stocke l'email dans le contexte pour les autres fonctionnalités

@@ -4,10 +4,12 @@ import com.quentinlecourt.podwertask_mobile.data.model.LoginRequest
 import com.quentinlecourt.podwertask_mobile.data.model.LoginResponse
 import com.quentinlecourt.podwertask_mobile.data.model.MqttIdResponse
 import com.quentinlecourt.podwertask_mobile.data.model.ScaleResponse
+import com.quentinlecourt.podwertask_mobile.data.model.UsersListResponse
 import retrofit2.http.POST
 import retrofit2.http.Body
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 /**
  * MyApi
@@ -22,5 +24,11 @@ interface MyAPI {
 
     @GET("machines")
     suspend fun getMachines(): Response<ScaleResponse>
+
+    // Chercher la liste des utilisateurs liés à une balance spécifique
+    @GET("machine/{machineId}/users")
+    suspend fun getUsersByMachineId(
+        @Path("machineId") machineId: Int
+    ): Response<UsersListResponse>
 
 }

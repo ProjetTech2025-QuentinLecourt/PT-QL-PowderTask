@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	ChefEquipe          = "CE"
+	Poudreur            = "P"
+	OperateurProduction = "OP"
+)
+
 func RegisterRoutes(r *gin.Engine) {
 
 	//Route pour le login
@@ -17,6 +23,11 @@ func RegisterRoutes(r *gin.Engine) {
 	users := r.Group("/users")
 	{
 		users.POST("", controllers.CreateUser)
+	}
+
+	machine := r.Group("/machine")
+	{
+		machine.GET("/:id/users", midllewares.AuthMiddleware(ChefEquipe), controllers.GetMachineUsers)
 	}
 
 }

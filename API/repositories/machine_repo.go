@@ -26,3 +26,19 @@ func GetUserMachines(userId uint) ([]*daos.Scale, error) {
 
 	return scales, nil
 }
+
+func GetUsersByMachineId(machineId uint) ([]*daos.User, error) {
+	var users []*daos.User
+
+	err := database.DB.
+		Joins("JOIN users_scales ON users_scales.users_id = users.id").
+		Where("users_scales.scales_id = ?", machineId).
+		Find(&users).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

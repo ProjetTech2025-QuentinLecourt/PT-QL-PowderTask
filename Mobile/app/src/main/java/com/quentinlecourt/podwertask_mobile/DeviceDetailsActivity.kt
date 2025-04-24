@@ -1,5 +1,17 @@
 package com.quentinlecourt.podwertask_mobile
 
+/**
+ * Activité des détails de la machine/balance
+ *
+ * @todoForUpgrade
+ * @todo Mettre en place en MVVM + Data Biding
+ * @todo Ne mettr à jour que lorsqu'un attribut est modifié
+ *
+ * @version 1.0
+ * @versionDate 2025/04/21 16:00
+ * @author Quentin Lecourt
+ * @project Powder Scale Systems
+ */
 
 import SessionManager
 import android.os.Bundle
@@ -12,6 +24,7 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.quentinlecourt.podwertask_mobile.data.services.MqttManager
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
 import java.text.SimpleDateFormat
@@ -19,10 +32,13 @@ import java.util.Date
 import java.util.Locale
 import kotlin.properties.Delegates
 import com.google.gson.Gson
+import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
+import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
+import kotlinx.coroutines.launch
 
 class MaterialsDetailsActivity : AppCompatActivity() {
 
-    // Déclaration des vues
+    /************** Views Section **************/
     private lateinit var returnButton: ImageButton
     private lateinit var deviceNameTextView: TextView
     private lateinit var machineStatusTextView: TextView
@@ -40,17 +56,17 @@ class MaterialsDetailsActivity : AppCompatActivity() {
     private lateinit var associateUserListView: ListView
     private lateinit var associateUserListLayout: LinearLayout
 
+    /************** Machines Section **************/
     private lateinit var machine: Machine
     private var machineId by Delegates.notNull<Int>()
     private lateinit var machineName: String
 
+    /************** API et session **************/
+    private val apiService: MyAPI by lazy { RetrofitInstance.apiService }
     private lateinit var sessionManager: SessionManager
     private lateinit var userJob: String
 
-    private var userListDownloaded by Delegates.notNull<Boolean>()
-
-    private lateinit var mqttManager: MqttManager
-
+    /************** String **************/
     private lateinit var strStable: String
     private lateinit var strOnMove: String
     private lateinit var strIncoherent: String
@@ -59,18 +75,25 @@ class MaterialsDetailsActivity : AppCompatActivity() {
     private lateinit var strNoInfo: String
     private lateinit var strProblem: String
 
+    /************** Colors **************/
     private var colorOk by Delegates.notNull<Int>()
     private var colorProblem by Delegates.notNull<Int>()
     private var colorPanic by Delegates.notNull<Int>()
     private var colorUnknow by Delegates.notNull<Int>()
 
+    /************** Others **************/
+    private var userListDownloaded by Delegates.notNull<Boolean>()
+    private lateinit var mqttManager: MqttManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_materials_details)
 
+        // Sessions
         sessionManager = SessionManager(this)
         userJob = sessionManager.fetchAuthToken()?.decodeJwt()?.get("job").toString()
 
+        // Récupération de l'id et du nom de la balance
         machineId = intent.getIntExtra("MACHINE_ID", -1)
         machineName = intent.getStringExtra("MACHINE_NAME").toString()
 
@@ -89,11 +112,9 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             display = null,
             datetimeDelivery = null
         )
-
         userListDownloaded = false
 
         mqttManager = MqttManager(applicationContext)
-
         if (machineId != -1) {
             mqttManager.connect { connected ->
                 if (connected) {
@@ -110,9 +131,9 @@ class MaterialsDetailsActivity : AppCompatActivity() {
                 }
             }
             setupMqttStatusCallback()
-            // Initialisation des vues
+
             initViews()
-            initString()
+            initConst()
 
             setupData()
 
@@ -124,17 +145,16 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             )
                 .show()
         }
-
-        // TODO : GONE si l'utilisateur est un employé
-        // TODO : Afficher si l'utilisateur est un Chef d'équipe et aller chercher la liste des personnes associées dans l'API
-        // associateUserListLayout.visibility = View.GONE
-
         // Configuration du bouton de retour
         returnButton.setOnClickListener {
             finish()
         }
     }
 
+    /**
+     * Méthode de mise en place du callback du MQTT
+     * Ecoute sur le broker et met à jour les détails de la balance
+     */
     private fun setupMqttStatusCallback() {
         mqttManager.setStatusCallback { machineId, isOnline, machineDetails ->
             machine.let {
@@ -151,12 +171,14 @@ class MaterialsDetailsActivity : AppCompatActivity() {
                 machine.datetimeDelivery = machineDetails?.datetimeDelivery
 
                 runOnUiThread {
+                    // Mise à jour des éléments affichés
                     setupData()
                 }
             }
         }
     }
 
+    // Initialisation des éléments
     private fun initViews() {
         returnButton = findViewById(R.id.return_from_deviceDetails)
         deviceNameTextView = findViewById(R.id.tv_deviceDetails)
@@ -176,7 +198,8 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         associateUserListLayout = findViewById(R.id.linearLayout_associateUserToThisDevice)
     }
 
-    private fun initString() {
+    // Initialisation des constantes string et color
+    private fun initConst() {
         strStable = getString(R.string.stable)
         strOnMove = getString(R.string.on_move)
         strIncoherent = getString(R.string.incoherent)
@@ -191,6 +214,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         colorUnknow = R.drawable.none_status
     }
 
+    // Affiche les attributs de la balance dans les éléments de la vue
     private fun setupData() {
         // TODO :Modifier la valeurs des balises si elle a changé uniquement
         deviceNameTextView.text = machine.name
@@ -204,7 +228,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         }
 
         // Statut global
-        // TODO : Make a function who determine the global status value
+        // TODO : Faire une fonction qui détermine la valeur du status global (systemes de points)
         globalStatusTextView.text = "100%"
         globalStatusTextView.setBackgroundResource(R.drawable.online_status)
         if (machine.datetimeDelivery != null) {
@@ -215,13 +239,13 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         }
 
         // Accéléromètre
+        // TODO: Voir une pour version améliorer, code qui se répete
         accelerometerStatusTextView.text = when (machine.accelerometerStatus) {
             0 -> strUnavailiable
             1 -> strOnMove
             2 -> strStable
             else -> strNoInfo
         }
-
         accelerometerStatusTextView.setBackgroundResource(
             when (machine.accelerometerStatus) {
                 0 -> colorPanic
@@ -269,21 +293,47 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             }
         )
 
-        // Liste des utilisateurs associés
-        // TODO : Recuperer une liste d'utilisateur par l'API une seule fois!
+        // Liste des utilisateurs
         if (!userListDownloaded) {
             if (userJob == "CE") {
                 associateUserListLayout.visibility = View.VISIBLE
-                val users = listOf("Jean Dupont", "Marie Martin")
-                val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, users)
-                associateUserListView.adapter = adapter
+                fetchUsersForMachine()
             } else {
                 associateUserListLayout.visibility = View.GONE
             }
-            userListDownloaded = true
         }
 
+    }
 
+    // Appel à l'API pour la liste des utilisateurs liés à la balance
+    private fun fetchUsersForMachine() {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getUsersByMachineId(machineId)
+                if (response.isSuccessful) {
+                    val users = response.body()?.users ?: emptyList()
+                    val adapter = ArrayAdapter(
+                        this@MaterialsDetailsActivity,
+                        android.R.layout.simple_list_item_1,
+                        users.map { "${it.first_name} ${it.last_name}" }
+                    )
+                    associateUserListView.adapter = adapter
+                    userListDownloaded = true
+                } else {
+                    Toast.makeText(
+                        this@MaterialsDetailsActivity,
+                        "Erreur lors de la récupération des utilisateurs: ${response.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MaterialsDetailsActivity,
+                    "Erreur réseau: ${e.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     // Todo : Mettre cette fonction dans un useful ou ailleurs

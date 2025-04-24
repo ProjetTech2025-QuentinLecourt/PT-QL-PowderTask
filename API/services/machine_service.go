@@ -38,3 +38,20 @@ func GetUserMachines(userId uint) ([]*dtos.ScaleDto, error) {
 
 	return machinesDTOs, err
 }
+
+func GetUsersByMachineId(machineId uint) ([]*dtos.UserDtoResponseForList, error) {
+	users, err := repositories.GetUsersByMachineId(machineId)
+	if err != nil {
+		return nil, err
+	}
+
+	var usersDTOs []*dtos.UserDtoResponseForList
+	for _, user := range users {
+		userDto := &dtos.UserDtoResponseForList{}
+		err = copier.Copy(userDto, user)
+		usersDTOs = append(usersDTOs, userDto)
+	}
+
+	return usersDTOs, err
+
+}

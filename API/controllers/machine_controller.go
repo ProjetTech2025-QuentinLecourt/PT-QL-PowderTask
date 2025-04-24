@@ -2,32 +2,41 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"waiter-assist/models/dtos"
 	"waiter-assist/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetMachines(c *gin.Context) {
+func getValidatedEmail(c *gin.Context) (string, *gin.H) {
 	email, exists := c.Get("email")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		return "", &gin.H{
 			"error":   "Authentification requise",
 			"details": "Email manquant dans le contexte",
-		})
-		return
+		}
 	}
 
 	emailStr, ok := email.(string)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{
+		return "", &gin.H{
 			"error":   "Format d'email invalide",
 			"details": "L'email doit être une chaîne de caractères",
-		})
+		}
+	}
+
+	return emailStr, nil
+}
+
+func GetMachines(c *gin.Context) {
+	email, errResponse := getValidatedEmail(c)
+	if errResponse != nil {
+		c.JSON(http.StatusUnauthorized, errResponse)
 		return
 	}
 
-	user, err := services.GetUserByEmail(emailStr)
+	user, err := services.GetUserByEmail(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Erreur lors de la récupération de l'utilisateur",
@@ -73,4 +82,27 @@ func GetMachines(c *gin.Context) {
 			"scales": machines,
 		},
 	})
+}
+
+func GetMachineUsers(c *gin.Context) {
+	id := c.Param("id")
+	idUnit, err := strconv.ParseUint(id, 10, 32) // Changez de 16 à 32 bits
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "ID invalide",
+			"details": "L'ID doit être un nombre entier positif",
+		})
+		return
+	}
+
+	usersList, err := services.GetUsersByMachineId(uint(idUnit)) // Conversion en uint
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Erreur lors de la récupération des utilisateurs",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": usersList})
 }
