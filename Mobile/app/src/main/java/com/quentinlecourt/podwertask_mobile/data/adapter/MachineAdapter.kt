@@ -55,7 +55,7 @@ class MachineAdapter(
         val colorUnknow = R.drawable.none_status
 
         // Définir le statut de la machine et sa couleur d'arrière plan
-        if (currentMachine.isOnline) {
+        if (currentMachine.isOnline == true) {
             holder.machineStatus.text = holder.itemView.context.getString(R.string.online)
             holder.machineStatus.background =
                 AppCompatResources.getDrawable(holder.itemView.context, R.drawable.online_status)

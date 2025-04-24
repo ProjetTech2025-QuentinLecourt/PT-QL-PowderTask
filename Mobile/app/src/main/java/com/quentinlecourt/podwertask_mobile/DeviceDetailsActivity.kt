@@ -1,15 +1,15 @@
 package com.quentinlecourt.podwertask_mobile
 
-import android.graphics.drawable.Drawable
+
 import android.os.Bundle
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
+import com.quentinlecourt.podwertask_mobile.data.services.MqttManager
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -37,6 +37,10 @@ class MaterialsDetailsActivity : AppCompatActivity() {
     private lateinit var associateUserListLayout: LinearLayout
 
     private lateinit var machine: Machine
+    private var machineId by Delegates.notNull<Int>()
+    private lateinit var machineName: String
+
+    private lateinit var mqttManager: MqttManager
 
     private lateinit var strStable: String
     private lateinit var strOnMove: String
@@ -55,13 +59,57 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_materials_details)
 
-        // machine = intent.getParcelableExtra("MACHINE") ?: throw IllegalStateException("Machine must be provided")
-        machine = intent.getParcelableExtra<Machine>("MACHINE")!!
-        val isOnline = intent.getBooleanExtra("IS_ONLINE", false)
+        machineId = intent.getIntExtra("MACHINE_ID", -1)
+        machineName = intent.getStringExtra("MACHINE_NAME").toString()
 
-        // Initialisation des vues
-        initViews()
-        initString()
+        machine = Machine(
+            id = machineId,
+            name = machineName,
+            isOnline = null,
+            accelerometerStatus = null,
+            accX = null,
+            accY = null,
+            accZ = null,
+            accNorm = null,
+            weightSensorStatus = null,
+            weightDetected = null,
+            calibrationIndex = null,
+            display = null,
+            datetimeDelivery = null
+        )
+
+        mqttManager = MqttManager(applicationContext)
+
+        if (machineId != -1) {
+            mqttManager.connect { connected ->
+                if (connected) {
+                    mqttManager.subscribeToMachineTopics(machineId)
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            "Échec de connexion au broker MQTT",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+                }
+            }
+            setupMqttStatusCallback()
+            // Initialisation des vues
+            initViews()
+            initString()
+
+            setupData()
+
+        } else {
+            Toast.makeText(
+                this,
+                "Impossible de récupérer les données de la machine. Identifiant inccorect.",
+                Toast.LENGTH_LONG
+            )
+                .show()
+        }
 
         // TODO : GONE si l'utilisateur est un employé
         // TODO : Afficher si l'utilisateur est un Chef d'équipe et aller chercher la liste des personnes associées dans l'API
@@ -71,8 +119,28 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         returnButton.setOnClickListener {
             finish()
         }
+    }
 
-        setupInitialData()
+    private fun setupMqttStatusCallback() {
+        mqttManager.setStatusCallback { machineId, isOnline, machineDetails ->
+            machine.let {
+                machine.isOnline = isOnline
+                machine.accelerometerStatus = machineDetails?.accelerometerStatus
+                machine.accX = machineDetails?.accX
+                machine.accY = machineDetails?.accY
+                machine.accZ = machineDetails?.accZ
+                machine.accNorm = machineDetails?.accNorm
+                machine.weightSensorStatus = machineDetails?.weightSensorStatus
+                machine.weightDetected = machineDetails?.weightDetected
+                machine.calibrationIndex = machineDetails?.calibrationIndex
+                machine.display = machineDetails?.display
+                machine.datetimeDelivery = machineDetails?.datetimeDelivery
+
+                runOnUiThread {
+                    setupData()
+                }
+            }
+        }
     }
 
     private fun initViews() {
@@ -109,11 +177,11 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         colorUnknow = R.drawable.none_status
     }
 
-    private fun setupInitialData() {
+    private fun setupData() {
         // TODO :Modifier la valeurs des balises si elle a changé uniquement
         deviceNameTextView.text = machine.name
 
-        if (machine.isOnline) {
+        if (machine.isOnline == true) {
             machineStatusTextView.text = getString(R.string.online)
             machineStatusTextView.setBackgroundResource(R.drawable.online_status)
         } else {
@@ -140,7 +208,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             else -> strNoInfo
         }
 
-        accelerometerStatusTextView.setBackgroundResource (
+        accelerometerStatusTextView.setBackgroundResource(
             when (machine.accelerometerStatus) {
                 0 -> colorPanic
                 1 -> colorProblem
@@ -160,7 +228,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             2 -> strStable
             else -> strNoInfo
         }
-        weightSensorStatusTextView.setBackgroundResource (
+        weightSensorStatusTextView.setBackgroundResource(
             when (machine.weightSensorStatus) {
                 0 -> colorPanic
                 1 -> colorProblem
@@ -172,14 +240,14 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         calibrationIndexTextView.text = machine.calibrationIndex.toString()
 
         // Affichage pour l'écran
-        stoneDisplayStatusTextView.text = when (machine.weightSensorStatus) {
+        stoneDisplayStatusTextView.text = when (machine.display) {
             0 -> strUnuseable
             1 -> strProblem
             2 -> strStable
             else -> strNoInfo
         }
-        stoneDisplayStatusTextView.setBackgroundResource (
-            when (machine.weightSensorStatus) {
+        stoneDisplayStatusTextView.setBackgroundResource(
+            when (machine.display) {
                 0 -> colorPanic
                 1 -> colorProblem
                 2 -> colorOk
@@ -193,6 +261,7 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, users)
         associateUserListView.adapter = adapter
     }
+
 
     // Méthode pour mettre à jour les données réelles (à appeler quand vous avez les vraies données)
 //    fun updateDeviceData(deviceData: DeviceData) {

@@ -64,7 +64,8 @@ class DevicesListActivity : AppCompatActivity() {
         machineAdapter = MachineAdapter(filteredMachines)
         { selectedMachine ->
             val intent = Intent(this, MaterialsDetailsActivity::class.java).apply {
-                putExtra("MACHINE", selectedMachine)
+                putExtra("MACHINE_ID", selectedMachine.id)
+                putExtra("MACHINE_NAME", selectedMachine.name)
             }
             startActivity(intent)
         }
@@ -232,7 +233,7 @@ class DevicesListActivity : AppCompatActivity() {
 
         filteredMachines.clear()
         filteredMachines.addAll(machines.filter { machine ->
-            val matchesOnlineFilter = !showOnline || machine.isOnline
+            val matchesOnlineFilter = !showOnline || machine.isOnline == true
 
             val hasAccelerometerIssue = machine.accelerometerStatus?.let { it < 2 } ?: false
             val hasWeightSensorIssue = machine.weightSensorStatus?.let { it < 2 } ?: false
@@ -262,7 +263,7 @@ class DevicesListActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         mqttManager.disconnect()
+        super.onDestroy()
     }
 }
