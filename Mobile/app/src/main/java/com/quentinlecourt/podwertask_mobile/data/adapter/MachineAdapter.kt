@@ -111,7 +111,10 @@ class MachineAdapter(
         )
         // Ajout du clic sur l'item
         holder.itemView.setOnClickListener {
-            onItemClick(currentMachine)
+            if (currentMachine.weightSensorStatus != null && currentMachine.accelerometerStatus != null)
+            {
+                onItemClick(currentMachine)
+            }
         }
     }
 

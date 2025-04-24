@@ -1,7 +1,10 @@
 package com.quentinlecourt.podwertask_mobile
 
 
+import SessionManager
 import android.os.Bundle
+import android.util.Base64
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -15,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.properties.Delegates
+import com.google.gson.Gson
 
 class MaterialsDetailsActivity : AppCompatActivity() {
 
@@ -40,6 +44,11 @@ class MaterialsDetailsActivity : AppCompatActivity() {
     private var machineId by Delegates.notNull<Int>()
     private lateinit var machineName: String
 
+    private lateinit var sessionManager: SessionManager
+    private lateinit var userJob: String
+
+    private var userListDownloaded by Delegates.notNull<Boolean>()
+
     private lateinit var mqttManager: MqttManager
 
     private lateinit var strStable: String
@@ -59,6 +68,9 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_materials_details)
 
+        sessionManager = SessionManager(this)
+        userJob = sessionManager.fetchAuthToken()?.decodeJwt()?.get("job").toString()
+
         machineId = intent.getIntExtra("MACHINE_ID", -1)
         machineName = intent.getStringExtra("MACHINE_NAME").toString()
 
@@ -77,6 +89,8 @@ class MaterialsDetailsActivity : AppCompatActivity() {
             display = null,
             datetimeDelivery = null
         )
+
+        userListDownloaded = false
 
         mqttManager = MqttManager(applicationContext)
 
@@ -256,16 +270,31 @@ class MaterialsDetailsActivity : AppCompatActivity() {
         )
 
         // Liste des utilisateurs associés
-        // TODO : Recuperer une liste d'utilisateur par l'API dans le cas ou l'utilisateur actuel de l'app est un admin
-        val users = listOf("Jean Dupont", "Marie Martin")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, users)
-        associateUserListView.adapter = adapter
+        // TODO : Recuperer une liste d'utilisateur par l'API une seule fois!
+        if (!userListDownloaded) {
+            if (userJob == "CE") {
+                associateUserListLayout.visibility = View.VISIBLE
+                val users = listOf("Jean Dupont", "Marie Martin")
+                val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, users)
+                associateUserListView.adapter = adapter
+            } else {
+                associateUserListLayout.visibility = View.GONE
+            }
+            userListDownloaded = true
+        }
+
+
     }
 
-
-    // Méthode pour mettre à jour les données réelles (à appeler quand vous avez les vraies données)
-//    fun updateDeviceData(deviceData: DeviceData) {
-//        // Implémentez cette méthode pour mettre à jour l'UI avec les données réelles
-//        // deviceData serait un objet contenant toutes les informations de la machine
-//    }
+    // Todo : Mettre cette fonction dans un useful ou ailleurs
+    private fun String.decodeJwt(): Map<String, String>? {
+        return try {
+            val payload = this.split(".")[1]
+            val decodedBytes = Base64.decode(payload, Base64.URL_SAFE)
+            val decodedString = String(decodedBytes, Charsets.UTF_8)
+            Gson().fromJson(decodedString, Map::class.java) as? Map<String, String>
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
