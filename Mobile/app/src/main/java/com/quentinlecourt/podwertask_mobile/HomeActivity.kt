@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,9 +15,10 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var tvUsername: TextView
-    private lateinit var tvWelcome: TextView
-    private lateinit var btnDevicesList: Button
-    private lateinit var btnLogout: Button
+    private lateinit var btnLogout: ImageButton
+    private lateinit var btnNewMeasurement: Button
+    private lateinit var btnDevicesStatus: Button
+
     private lateinit var background: RelativeLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,10 +27,10 @@ class HomeActivity : AppCompatActivity() {
 
         background = findViewById(R.id.rl_backgroundHome)
 
-        tvUsername = findViewById(R.id.tv_h_username)
-        tvWelcome = findViewById(R.id.tv_h_welcome)
+        tvUsername = findViewById(R.id.tv_username)
         btnLogout = findViewById(R.id.btn_logout)
-        btnDevicesList = findViewById(R.id.btn_devicesList)
+        btnNewMeasurement = findViewById(R.id.btn_newMeasurement)
+        btnDevicesStatus = findViewById(R.id.btn_devicesStatus)
 
         val token = sessionManager.fetchAuthToken()
         val claims = token?.decodeJwt()
@@ -39,25 +41,21 @@ class HomeActivity : AppCompatActivity() {
             if (userJob != null) {
                 when {
                     userJob.isEmpty() || userFirstname.isEmpty() -> {
-                        tvWelcome.text = "Impossible de récupérer le job de l'utilisateur"
                         background.setBackgroundResource(R.color.white)
                     }
 
                     userJob == "CE" -> {
-                        tvWelcome.text = getString(R.string.welcome_admin)
                         tvUsername.text = userFirstname
                         background.setBackgroundResource(R.drawable.admin_background)
                     }
 
                     userJob == "P" || userJob == "OP" -> {
-                        tvWelcome.text = getString(R.string.welcome_user)
                         tvUsername.text = userFirstname
                         background.setBackgroundResource(R.drawable.background)
                     }
 
                     else -> {
-                        tvWelcome.text = "Le job de l'utilisateur n'est pas valide"
-
+                        background.setBackgroundResource(R.color.white)
                     }
                 }
             }
@@ -69,7 +67,7 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        btnDevicesList.setOnClickListener {
+        btnDevicesStatus.setOnClickListener {
             navigateToDevicesList()
         }
     }

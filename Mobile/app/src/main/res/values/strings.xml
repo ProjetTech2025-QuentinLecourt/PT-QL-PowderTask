@@ -57,4 +57,9 @@
     <string name="menu_lastUpdateFirst">"Tri par date (récent)"</string>
     <string name="menu_farUpdateFirst">"Tri par date (ancien)"</string>
 
+    <string name="logout_desc">Déconnexion</string>
+    <string name="welcome">"Bienvenue  "</string>
+    <string name="new_measurement">Nouvelle mesure</string>
+    <string name="machines_status">Statut des machines</string>
+
 </resources>
