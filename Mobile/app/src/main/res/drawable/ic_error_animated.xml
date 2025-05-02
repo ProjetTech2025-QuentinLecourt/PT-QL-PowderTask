@@ -1,0 +1,8 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_error">
+
+    <target
+        android:name="x_mark"
+        android:animation="@anim/x_mark_anim"/>
+
+</animated-vector>

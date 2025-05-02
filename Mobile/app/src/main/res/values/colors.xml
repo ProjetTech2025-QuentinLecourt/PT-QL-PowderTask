@@ -3,10 +3,12 @@
     <!--  Basics  -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_90">#E6FFFFFF</color>
     <color name="dark_grey">#212121</color>
 
     <!--  Blue Management   -->
-    <color name="bleu_gestion_t">#9C6EB4B9</color>
+    <color name="bleu_gestion_t_61">#9C6EB4B9</color>
+    <color name="bleu_gestion_t_52">#856EB4B9</color>
     <color name="bleu_gestion">#76979C</color>
     <color name="bleu_gestion_visible">#AE1F6098</color>
 

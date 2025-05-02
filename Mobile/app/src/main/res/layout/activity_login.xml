@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="50dp"
-            android:backgroundTint="@color/bleu_gestion_t"
+            android:backgroundTint="@color/bleu_gestion_t_61"
             android:padding="12dp"
             android:radius="24dp"
             android:text="@string/connection"

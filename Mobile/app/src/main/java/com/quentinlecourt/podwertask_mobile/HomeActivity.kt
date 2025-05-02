@@ -67,6 +67,9 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+        btnNewMeasurement.setOnClickListener {
+            navigateToNewMeasuremnt()
+        }
         btnDevicesStatus.setOnClickListener {
             navigateToDevicesList()
         }
@@ -74,6 +77,11 @@ class HomeActivity : AppCompatActivity() {
 
     private fun navigateToDevicesList() {
         val intent = Intent(this, DevicesListActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToNewMeasuremnt() {
+        val intent = Intent(this, MeasurementActivity::class.java)
         startActivity(intent)
     }
 

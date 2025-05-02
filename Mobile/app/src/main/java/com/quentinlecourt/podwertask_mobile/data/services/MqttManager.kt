@@ -218,6 +218,8 @@ class MqttManager(private val context: Context) {
 //        }
 //    }
 
+    // TODO : requestCalibration(calibrationType -> Auto || Manu) envoie une command à la machine pour demander une calibation
+
     private fun resubscribeToAllTopics() {
         subscriptions.forEach { (machineId, topic) ->
             try {

@@ -378,7 +378,7 @@
                 android:id="@+id/list_associateUserToThisDevice"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:divider="@color/bleu_gestion_t"
+                android:divider="@color/bleu_gestion_t_61"
                 android:dividerHeight="1dp"
                 android:scrollbars="vertical" />
         </LinearLayout>

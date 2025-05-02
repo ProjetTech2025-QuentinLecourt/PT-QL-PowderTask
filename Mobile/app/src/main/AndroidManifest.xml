@@ -46,6 +46,10 @@
             android:name=".MaterialsDetailsActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".MeasurementActivity"
+            android:exported="true" />
+
         <service android:name="org.eclipse.paho.android.service.MqttService" />
     </application>
 

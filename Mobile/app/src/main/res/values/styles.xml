@@ -13,4 +13,34 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:minWidth">64dp</item>
     </style>
+
+    <style name="CalibrationButton">
+        <item name="android:backgroundTint">@color/bleu_gestion_t_52</item>
+        <item name="android:textColor">@color/white_90</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="FullScreenDialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+    </style>
+
+    <style name="LoadingDialogTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
+
+    <style name="CustomButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="backgroundTint">@color/bleu_gestion_t_61</item>
+    </style>
 </resources>
