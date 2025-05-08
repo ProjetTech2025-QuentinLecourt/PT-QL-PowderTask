@@ -23,6 +23,12 @@
     <color name="rouge_cerise_mur_t">#80D1003B</color>
     <color name="orange_pemplemouse">#EF522D</color>
 
+    <!--  Degrader de rouge  -->
+    <color name="rouge_20">#99F5FF65</color>
+    <color name="rouge_40">#99FFCC65</color>
+    <color name="rouge_60">#99FFA365</color>
+    <color name="rouge_80">#99FF7C65</color>
+
     <!-- Scale Status -->
     <color name="color_status_none">#74969696</color>
     <color name="color_status_online">#8023C43B</color>

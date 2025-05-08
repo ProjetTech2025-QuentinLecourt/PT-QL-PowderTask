@@ -7,7 +7,12 @@ import com.google.gson.Gson
 import com.quentinlecourt.podwertask_mobile.BuildConfig
 import com.quentinlecourt.podwertask_mobile.data.api.MyAPI
 import com.quentinlecourt.podwertask_mobile.data.api.RetrofitInstance
+import com.quentinlecourt.podwertask_mobile.data.model.CalibrationReturn
+import com.quentinlecourt.podwertask_mobile.data.model.CalibrationType
 import com.quentinlecourt.podwertask_mobile.data.model.Machine
+import com.quentinlecourt.podwertask_mobile.data.model.MachineAutoCalibration
+import com.quentinlecourt.podwertask_mobile.data.model.MachineManualCalibration
+import com.quentinlecourt.podwertask_mobile.data.model.MqttError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,8 +35,11 @@ class MqttManager(private val context: Context) {
 
     private val lastMessages = mutableMapOf<Int, Machine?>()
     private val lastOnlineStatus = mutableMapOf<Int, Boolean>()
+    private val lastAutoCalibrationStatus = mutableMapOf<Int, MachineAutoCalibration?>()
+    private val lastManualCalibrationStatus = mutableMapOf<Int, MachineManualCalibration?>()
 
     private var statusCallback: ((Int, Boolean, Machine?) -> Unit)? = null
+    private var calibrationCallback: ((Int, CalibrationReturn) -> Unit)? = null
 
     fun connect(callback: (Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -70,22 +78,28 @@ class MqttManager(private val context: Context) {
                                     Log.d(TAG, "Message reçu sur $topic: $payload")
 
                                     // Analyser le topic pour extraire l'ID de la machine
-                                    if (topic?.contains("/status/details") == true) {
+                                    if (topic != null) {
                                         val parts = topic.split("/")
                                         if (parts.size >= 3) {
                                             val machineId = parts[2].toIntOrNull()
                                             if (machineId != null) {
-                                                parseDetailsStatusMessage(machineId, payload)
-                                            }
-                                        }
-                                    }
-                                    // Analyser le topic pour extraire l'ID de la machine
-                                    if (topic?.contains("/status/online") == true) {
-                                        val parts = topic.split("/")
-                                        if (parts.size >= 3) {
-                                            val machineId = parts[2].toIntOrNull()
-                                            if (machineId != null) {
-                                                parseOnlineStatusMessage(machineId, payload)
+                                                when {
+                                                    topic.contains("/status/details") -> parseDetailsStatusMessage(
+                                                        machineId,
+                                                        payload
+                                                    )
+
+                                                    topic.contains("/status/online") -> parseOnlineStatusMessage(
+                                                        machineId,
+                                                        payload
+                                                    )
+
+                                                    topic.contains("/status/calibration/") -> parseCalibrationStatusMessage(
+                                                        machineId,
+                                                        topic,
+                                                        payload
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -128,6 +142,10 @@ class MqttManager(private val context: Context) {
         this.statusCallback = callback
     }
 
+    fun setCalibrationCallback(callback: (Int, CalibrationReturn) -> Unit) {
+        this.calibrationCallback = callback
+    }
+
     private fun parseDetailsStatusMessage(machineId: Int, statusJson: String) {
         try {
             val gson = Gson()
@@ -164,6 +182,108 @@ class MqttManager(private val context: Context) {
         }
     }
 
+    private fun parseCalibrationStatusMessage(machineId: Int, topic: String, payload: String) {
+        try {
+            val gson = Gson()
+
+            when {
+                topic.contains("/calibration/auto") -> {
+                    try {
+                        val calibration = gson.fromJson(payload, MachineAutoCalibration::class.java)
+                        lastAutoCalibrationStatus[machineId] = calibration
+                        calibrationCallback?.invoke(
+                            machineId,
+                            CalibrationReturn.AutoSuccess(calibration)
+                        )
+                    } catch (e: Exception) {
+                        handleCalibrationError(machineId, payload)
+                    }
+                }
+
+                topic.contains("/calibration/manual") -> {
+                    try {
+                        val calibration =
+                            gson.fromJson(payload, MachineManualCalibration::class.java)
+                        lastManualCalibrationStatus[machineId] = calibration
+                        calibrationCallback?.invoke(
+                            machineId,
+                            CalibrationReturn.ManualSuccess(calibration)
+                        )
+                    } catch (e: Exception) {
+                        handleCalibrationError(machineId, payload)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Erreur lors du parsing du message de calibration", e)
+            calibrationCallback?.invoke(
+                machineId,
+                CalibrationReturn.Error(MqttError("Erreur de parsing: ${e.message}"))
+            )
+        }
+    }
+
+    private fun handleCalibrationError(machineId: Int, payload: String) {
+        try {
+            val error = Gson().fromJson(payload, MqttError::class.java)
+            calibrationCallback?.invoke(
+                machineId,
+                CalibrationReturn.Error(error)
+            )
+            Log.e(TAG, "Erreur de calibration pour machine $machineId: ${error.error}")
+        } catch (e: Exception) {
+            calibrationCallback?.invoke(
+                machineId,
+                CalibrationReturn.Error(MqttError("Format de réponse inconnu"))
+            )
+        }
+    }
+
+    fun requestCalibration(
+        machineId: Int,
+        type: CalibrationType
+//        ,calibrationIndex: Float? = null // Optionnel, nécessaire seulement pour MANUAL
+    ) {
+        if (mqttClient == null || !mqttClient!!.isConnected) {
+            Log.w(TAG, "Client MQTT non connecté, impossible d'envoyer la commande")
+            calibrationCallback?.invoke(
+                machineId,
+                CalibrationReturn.Error(MqttError("Client MQTT non connecté"))
+            )
+            return
+        }
+
+        val commandTopic = "/scale/$machineId/commands"
+        val message = buildJsonString(type, null)
+
+        try {
+            mqttClient?.publish(commandTopic, message.toByteArray(), 1, false)
+            Log.d(TAG, "Commande de calibration ${type.name} envoyée à $commandTopic")
+        } catch (e: MqttException) {
+            Log.e(TAG, "Erreur lors de l'envoi de la commande à $commandTopic", e)
+            calibrationCallback?.invoke(
+                machineId,
+                CalibrationReturn.Error(MqttError("Erreur MQTT: ${e.message}"))
+            )
+        }
+    }
+
+    private fun buildJsonString(type: CalibrationType, calibrationIndex: Float?): String {
+        return when (type) {
+            CalibrationType.AUTO -> "{\"command\":\"calibrate\",\"type\":\"auto\"}"
+            CalibrationType.MANUAL -> "{\"command\":\"calibrate\",\"type\":\"manual\"}"
+        }
+    }
+
+    // Méthodes pour récupérer le dernier état connu
+    fun getLastAutoCalibrationStatus(machineId: Int): MachineAutoCalibration? {
+        return lastAutoCalibrationStatus[machineId]
+    }
+
+    fun getLastManualCalibrationStatus(machineId: Int): MachineManualCalibration? {
+        return lastManualCalibrationStatus[machineId]
+    }
+
     fun subscribeToMachineTopics(machineId: Int) {
         if (mqttClient == null || !mqttClient!!.isConnected) {
             Log.w(TAG, "Client MQTT non connecté, impossible de s'abonner")
@@ -173,15 +293,25 @@ class MqttManager(private val context: Context) {
         val statusTopic = "/scale/$machineId/status"
         val onlineStatusTopic = "$statusTopic/online"
         val detailsStatusTopic = "$statusTopic/details"
+        val calibrationAuto = "$statusTopic/calibration/auto"
+        val calibrationManuel = "$statusTopic/calibration/manual"
 
         try {
             mqttClient?.subscribe(onlineStatusTopic, 1)
             Log.d(TAG, "Abonnement réussi à $onlineStatusTopic")
             subscriptions[machineId] = onlineStatusTopic
-            mqttClient?.subscribe(detailsStatusTopic, 1)
 
+            mqttClient?.subscribe(detailsStatusTopic, 1)
             Log.d(TAG, "Abonnement réussi à $detailsStatusTopic")
             subscriptions[machineId] = detailsStatusTopic
+
+            mqttClient?.subscribe(calibrationAuto, 1)
+            Log.d(TAG, "Abonnement réussi à $calibrationAuto")
+            subscriptions[machineId] = calibrationAuto
+
+            mqttClient?.subscribe(calibrationManuel, 1)
+            Log.d(TAG, "Abonnement réussi à $calibrationManuel")
+            subscriptions[machineId] = calibrationManuel
         } catch (e: MqttException) {
             Log.e(TAG, "Erreur lors de l'abonnement à $statusTopic", e)
         }

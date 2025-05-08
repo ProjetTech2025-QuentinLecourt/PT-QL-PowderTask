@@ -15,3 +15,12 @@ data class Machine(
     var display: Int?, // 0-2
     var datetimeDelivery: Long?
 )
+
+data class MachineAutoCalibration(
+    var datetime: Long?
+)
+
+data class MachineManualCalibration(
+    var datetime: Long?,
+    var calibrationIndex: Float?
+)
