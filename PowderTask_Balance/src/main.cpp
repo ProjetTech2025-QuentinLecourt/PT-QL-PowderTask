@@ -31,6 +31,7 @@ PowderScaleController *powderScaleController = nullptr;
 void setup()
 {
   Serial.begin(ESP_SPEED); // Initialiser la communication série
+  delay(5000);
   Serial.println("Initialisation du contrôleur de balance...");
   powderScaleController = new PowderScaleController(CONTROLLER_INIT);
   if (powderScaleController == nullptr)

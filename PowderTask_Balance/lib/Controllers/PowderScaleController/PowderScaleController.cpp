@@ -1,6 +1,6 @@
 #include "PowderScaleController.h"
 
-PowderScaleController::PowderScaleController(controllerInit init)
+PowderScaleController::PowderScaleController(controllerInit init) : timeClient(ntpUDP, "pool.ntp.org")
 {
     rxGpio = init.rx;
     txGpio = init.tx;
@@ -20,7 +20,6 @@ PowderScaleController::PowderScaleController(controllerInit init)
     mqtt_port = init.mqtt_port;
     mqtt_user = init.mqtt_user;
     mqtt_password = init.mqtt_password;
-
     scaleClass = new Scale(sclale_dt, scale_sck);
     myStone = new MyStone(stoneSpeed, SERIAL_8N1, rxGpio, txGpio);
     wifiClient = new WiFiClientSecure();
@@ -170,6 +169,8 @@ bool PowderScaleController::init()
     // Suppression de la classe Scale suite à la verification
     // delete scaleClass;
     // scaleClass = nullptr;
+    weightSensorFunctionnal = true;
+    
 
     if (!beginAccelerometer())
     {
@@ -182,6 +183,9 @@ bool PowderScaleController::init()
 
     // Se connecter au Wi-Fi
     connectToWiFi();
+
+    Serial.println("WiFi connected, initializing NTP");
+    initNTP();
 
     // Configurer le client MQTT
     mqttClient->setServer(mqtt_server, mqtt_port);
@@ -227,15 +231,29 @@ void PowderScaleController::connectToMqtt()
     Serial.println("Connecting to MQTT...");
     while (!mqttClient->connected())
     {
-        if (mqttClient->connect("ESP32Client", mqtt_user, mqtt_password))
+        if (mqttClient->connect(
+                "ESP32Client",            // Client ID
+                mqtt_user,                // Username
+                mqtt_password,            // Password
+                "/scale/1/status/online", // Topic LWT
+                0,                        // QoS LWT
+                true,                     // Retain LWT
+                "{\"online\":false}"      // Message LWT
+                ))
         {
             Serial.println("Connected to MQTT");
             mqttClient->setCallback([this](char *topic, byte *payload, unsigned int length)
                                     { handleCommand(topic, payload, length); });
-            mqttClient->subscribe("/scale/1/status");
+
+            // Abonnements
+            mqttClient->subscribe("/scale/1/status/details");
+            mqttClient->subscribe("/scale/1/status/online");
+            mqttClient->subscribe("/scale/1/status/calibration/auto");
+            mqttClient->subscribe("/scale/1/status/calibration/manual"); // Correction: "manual" au lieu de "manuel"
             mqttClient->subscribe("/scale/1/commands");
-            mqttClient->subscribe("test");
-            mqttClient->publish("test", "Nouvelle connexion");
+
+            // Publication de l'état online
+            mqttClient->publish("/scale/1/status/online", "{\"online\":true}", true);
         }
         else
         {
@@ -265,6 +283,37 @@ void PowderScaleController::lookingForDatas()
     {
         Serial.println("Data:");
         Serial.println(dr.data);
+        switch (dr.id)
+        {
+        case 0x1001: // Bouton
+        {
+            std::string buttonName = dr.data;
+            buttonPressed(buttonName);
+            break;
+        }
+        }
+    }
+};
+
+/**
+ * buttonPressed(std::string buttonName)
+ *
+ * @param buttonName de type std::string "Nom du bouton"
+ *
+ * Génère la conséquence à la suite de la pression d'un de ces boutons
+ */
+void PowderScaleController::buttonPressed(std::string buttonName)
+{
+    buttonName.c_str();
+
+    if (buttonName == "btn_rtn_to_dashbord_wm" || buttonName == "btn_validate_wm")
+    {
+        isMeasuring = false;
+    }
+
+    if (buttonName == "btn_auto_calibrage") // Prochaine maj: Ne pas hardcoder
+    {
+        handleAutoCalibration();
     }
 };
 
@@ -285,27 +334,44 @@ void PowderScaleController::loop()
 
     if (scaleClass->is_ready())
     {
-        if (!weightSensorFunctionnal) weightSensorFunctionnal = true;
-        float weight = scaleClass->get_units_kg(20);
-        if (weight < 0)
+        if (!weightSensorFunctionnal)
+            weightSensorFunctionnal = true;
+        if (isMeasuring)
         {
-            weight = 0;
-        }
+            float weight = scaleClass->get_units_kg(20);
+            if (weight < 0)
+            {
+                weight = 0;
+            }
 
-        if (abs(weight - lastSentWeight) > WEIGHT_THRESHOLD)
-        {
-            myStone->setTextLabel("lbl_weight", floatToChar(weight));
-            mqttClient->publish("test", floatToChar(weight));
-            lastSentWeight = weight;
+            if (abs(weight - lastSentWeight) > WEIGHT_THRESHOLD)
+            {
+                myStone->setTextLabel("lbl_weight", floatToChar(weight));
+                lastSentWeight = weight;
+                publishStatus(true);
+            }
         }
+        erreurCount = 0;
     }
     else
     {
-        displayModal("Erreur capteur de poids", "Les capteurs de poids ne répondent pas.", "Impossible de récupérer la masse.");
-        weightSensorFunctionnal = false;
+        if (isMeasuring)
+        {
+            erreurCount++;
+        }
+
+        if (erreurCount > 2)
+        {
+            displayModal("Erreur capteur de poids", "Les capteurs de poids ne repondent pas.", "Impossible de recuperer la masse.");
+            weightSensorFunctionnal = false;
+        }
+    }
+    publishStatus(firstInit);
+    if (firstInit)
+    {
+        firstInit = false;
     }
     
-    publishStatus(false);
 }
 
 void PowderScaleController::displayModal(const char *title, const char *desc1, const char *desc2)
@@ -352,7 +418,6 @@ bool PowderScaleController::isMoving()
             Serial.println("Avertissement: Accéléromètre non fonctionnel");
             return false;
         }
-        
     }
 
     if (accelerometer->accelUpdate() != 0)
@@ -366,6 +431,7 @@ bool PowderScaleController::isMoving()
     float currentY = accelerometer->accelY();
     float currentZ = accelerometer->accelZ();
     float currentNorm = sqrt(currentX * currentX + currentY * currentY + currentZ * currentZ);
+    lastNorm = currentNorm;
 
     if (abs(currentNorm - ACCEL_NORM_STABLE) > 0.5f)
     { // Seuil élargi
@@ -397,6 +463,7 @@ bool PowderScaleController::isMoving()
     // Serial.printf("Seuil: %.3f | Moving: %d\n", MOVEMENT_THRESHOLD, isMoving);
 
     accelerometerFunctional = true;
+    isAccMoving = isMoving;
     return isMoving;
 }
 
@@ -417,6 +484,53 @@ void PowderScaleController::printAccelerometerData()
     }
 }
 
+void PowderScaleController::publishStatus(bool forced)
+{
+    static unsigned long lastPublishTime = 0;
+    const unsigned long publishInterval = 10000; // 1000 secondes
+
+    unsigned long currentTime = millis();
+    if (!forced && (currentTime - lastPublishTime < publishInterval))
+    {
+        return;
+    }
+    lastPublishTime = currentTime;
+
+    int accelerometerStatus = 0;
+
+    if (isAccMoving)
+    {
+        accelerometerStatus = 1;
+    }
+    else
+    {
+        accelerometerStatus = accelerometerFunctional ? 2 : 0;
+    }
+    int weightSensorStatus = 0;
+
+    if (weightSensorFunctionnal)
+    {
+        weightSensorStatus = 2;
+    }
+
+    // Créer le JSON
+    DynamicJsonDocument doc(512);
+    doc["accelerometerStatus"] = accelerometerStatus;
+    doc["accX"] = floatToChar(lastAccelX);
+    doc["accY"] = floatToChar(lastAccelY);
+    doc["accZ"] = floatToChar(lastAccelZ);
+    doc["accNorm"] = floatToChar(lastNorm);
+    doc["weightSensorStatus"] = weightSensorStatus;
+    doc["weightDetected"] = floatToChar(lastSentWeight);
+    doc["calibrationIndex"] = scale;
+    doc["display"] = 2;
+    doc["datetimeDelivery"] = getCurrentTimestamp();
+
+    char jsonBuffer[512];
+    serializeJson(doc, jsonBuffer);
+    mqttClient->publish("/scale/1/status/details", jsonBuffer, true);
+}
+
 void PowderScaleController::handleCommand(const char *topic, byte *payload, unsigned int length)
 {
     String message;
@@ -435,40 +549,92 @@ void PowderScaleController::handleCommand(const char *topic, byte *payload, unsi
         return;
     }
 
-    if (doc["command"] == "get_status")
+    if (strcmp(topic, "/scale/1/commands") == 0)
     {
+        const char *command = doc["command"];
 
-        // String fullTopic = String(topic);
-        // int idStart = fullTopic.indexOf("/scale/") + 7;
-        // int idEnd = fullTopic.indexOf("/commands");
-        // String scaleId = fullTopic.substring(idStart, idEnd);
-
-        publishStatus(true);
+        if (strcmp(command, "get_status") == 0)
+        {
+            publishStatus(true);
+        }
+        else if (strcmp(command, "calibrate") == 0)
+        {
+            const char *type = doc["type"];
+            if (strcmp(type, "auto") == 0)
+            {
+                handleAutoCalibration();
+            }
+            // else if (strcmp(type, "manual") == 0) {
+            //     float index = doc["index"] | 0.0f;
+            //     handleManualCalibration(index);
+            // }
+        }
     }
 }
 
-void PowderScaleController::publishStatus(bool forced = false)
+void PowderScaleController::handleAutoCalibration()
 {
-    if ((lastAccelerometerFunctional != accelerometerFunctional) || (lastWeightSensorFunctionnal != weightSensorFunctionnal) || forced)
+    // Implémentez la logique de calibration auto ici
+    scaleClass->tare();
+
+    DynamicJsonDocument doc(128);
+    doc["datetime"] = getCurrentTimestamp();
+
+    char jsonBuffer[128];
+    serializeJson(doc, jsonBuffer);
+    mqttClient->publish("/scale/1/status/calibration/auto", jsonBuffer);
+    if (!isMeasuring)
     {
-        lastAccelerometerFunctional = accelerometerFunctional;
-        lastWeightSensorFunctionnal = weightSensorFunctionnal;
-        DynamicJsonDocument doc(256);
+        myStone->setView("w_weight_measure");
+    }
+    isMeasuring = true;
+    displayModal("Calibrage", "La balance est calibree", "Remise a zero : OK");
+}
 
-        // Ajouter les données au JSON
-        doc["accelerometer"] = lastAccelerometerFunctional;
-        doc["weightSensor"] = lastWeightSensorFunctionnal;
-        doc["timestamp"] = millis();
+// void PowderScaleController::handleManualCalibration(float index) {
+//     scaleClass->set_scale(index);
 
-        // Sérialiser le JSON
-        char jsonBuffer[256];
-        serializeJson(doc, jsonBuffer);
+//     // Publier le résultat
+//     DynamicJsonDocument doc(128);
+//     doc["datetime"] = getCurrentTimestamp();
+//     doc["calibrationIndex"] = index;
 
-        // Construire le topic de réponse
-        char statusTopic[50];
-        snprintf(statusTopic, sizeof(statusTopic), "/scale/%s/status", scaleId);
+//     char jsonBuffer[128];
+//     serializeJson(doc, jsonBuffer);
+//     mqttClient->publish("/scale/1/status/calibration/manual", jsonBuffer);
+// }
 
-        // Publier le message
-        mqttClient->publish(statusTopic, jsonBuffer);
+long PowderScaleController::getCurrentTimestamp()
+{
+    if (!timeClient.update())
+    {
+        timeClient.forceUpdate();
+    }
+    return timeClient.getEpochTime();
+}
+
+void PowderScaleController::initNTP()
+{
+    Serial.println("Initialisation NTP...");
+    timeClient.begin();
+    Serial.println("NTP begin done");
+
+    // Attendre la première mise à jour
+    int retries = 0;
+    while (!timeClient.update() && retries < 5)
+    {
+        Serial.println("Mise à jour NTP...");
+        timeClient.forceUpdate();
+        delay(500);
+        retries++;
+    }
+
+    if (retries >= 5)
+    {
+        Serial.println("Échec de la synchronisation NTP");
+    }
+    else
+    {
+        Serial.println("Heure synchronisée: " + String(timeClient.getFormattedTime()));
     }
 }

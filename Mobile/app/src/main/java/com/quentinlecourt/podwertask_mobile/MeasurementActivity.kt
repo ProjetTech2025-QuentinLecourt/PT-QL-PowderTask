@@ -207,6 +207,7 @@ class MeasurementActivity : AppCompatActivity() {
         }
 
         btnManualCButton = findViewById(R.id.btn_manual_calibrate)
+        btnManualCButton.visibility = View.GONE
         btnManualCButton.setOnClickListener {
             if (calibrationLoadingStatus) return@setOnClickListener
 

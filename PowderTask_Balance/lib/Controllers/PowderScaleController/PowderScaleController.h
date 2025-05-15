@@ -14,6 +14,8 @@
 #include <Wire.h>
 #include <MPU9250_asukiaaa.h>
 #include <ArduinoJson.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 #define EEPROM_SIZE 512  // Taille max ESP32 (4 Ko possible)
 
@@ -62,6 +64,7 @@ private:
     float lastAccelX = 0;
     float lastAccelY = 0;
     float lastAccelZ = 0;
+    float lastNorm   = 0;
     float movementThreshold;
     unsigned long lastCheckTime;
 
@@ -70,9 +73,13 @@ private:
     const char* scaleId = "1";
 
     // Variables d'état 
+    bool firstInit = true;
     bool accelerometerInit = false;
     bool accelerometerFunctional = false;
     bool weightSensorFunctionnal = false;
+    unsigned short erreurCount = 0;
+    bool isMeasuring = false;
+    bool isAccMoving = false;
     bool lastAccelerometerFunctional = accelerometerFunctional;
     bool lastWeightSensorFunctionnal = weightSensorFunctionnal;
 
@@ -82,6 +89,8 @@ private:
     const char *mqtt_user;
     const char *mqtt_password;
 
+    WiFiUDP ntpUDP;
+    NTPClient timeClient;
     Scale *scaleClass = nullptr;
     MyStone *myStone = nullptr;
     WiFiClientSecure *wifiClient = nullptr;
@@ -97,9 +106,14 @@ private:
     void clearEEPROM();
 
     void displayModal(const char* title, const char* desc1, const char* desc2);
-
-    void handleCommand(const char* topic, byte* payload, unsigned int length);
     void publishStatus(bool forced);
+
+    void handleCommand(const char *topic, byte *payload, unsigned int length);
+    void handleAutoCalibration();
+    // void handleManualCalibration(float index);
+    long getCurrentTimestamp();
+    void initNTP();
+    void buttonPressed(std::string buttonName);
 
 public:
     PowderScaleController(controllerInit init);
